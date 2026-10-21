@@ -1,0 +1,9 @@
+{
+  "name": "Fox Family Dauphin Island 2027",
+  "short_name": "Fox Island",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6ecd9",
+  "theme_color": "#0b5d8a",
+  "icons": [{ "src": "images/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

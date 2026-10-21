@@ -6,5 +6,6 @@ FOX.config = {
   tripEnd: '2027-06-19',     // last day
   weather: { lat: 30.2552, lng: -88.1097 },
   map: { lat: 30.2495, lng: -88.115, zoom: 12 },
-  welcome: 'Welcome, Fox Family!'
+  welcome: 'Welcome, Fox Family!',
+  lastUpdated: 'June 2027'  // optional; shown in the footer
 };

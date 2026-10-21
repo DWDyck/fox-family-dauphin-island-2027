@@ -16,17 +16,37 @@
       '<a href="#/more" class="more"' + (cur === '#/more' ? ' aria-current="page"' : '') + '><span aria-hidden="true">☰</span>More</a>';
   }
 
+  const TITLES = { home: 'Home', calendar: 'Calendar', map: 'Island Map', meals: 'Meals & Gatherings', houses: 'House Info', family: 'Family Directory', gallery: 'Photos', memories: 'Memories', more: 'Menu' };
+  let first = true;
+
   function route() {
     F.maps.splice(0).forEach((m) => m.remove());
     const parts = (location.hash || '#/').replace(/^#\/?/, '').split('/');
-    const name = parts[0] || 'home';
-    (F.pages[name] || F.pages.home)($('#app'), parts[1]);
-    document.title = F.config.title;
+    const name = F.pages[parts[0]] ? parts[0] : 'home';
+    F.pages[name]($('#app'), parts[1]);
+    document.title = (name === 'home' ? '' : TITLES[name] + ' · ') + F.config.title;
     renderNav();
     if (!(name === 'map' && parts[1])) window.scrollTo(0, 0);
+    if (!first) $('#app').focus({ preventScroll: true });
+    first = false;
   }
+
+  // Bigger text for anyone who wants it; remembered on this device.
+  const big = () => document.documentElement.classList.contains('big');
+  const setBig = (on) => {
+    document.documentElement.classList.toggle('big', on);
+    const b = $('#textsize'); b.setAttribute('aria-pressed', on); b.textContent = on ? 'A−' : 'A+'; b.setAttribute('aria-label', on ? 'Make text smaller' : 'Make text bigger');
+    try { localStorage.setItem('fox-big', on ? '1' : ''); } catch (e) {}
+  };
+  try { if (localStorage.getItem('fox-big')) setBig(true); } catch (e) {}
+  $('#textsize').onclick = () => setBig(!big());
+
+  if (F.config.lastUpdated) $('#stamp').textContent = 'Last updated ' + F.config.lastUpdated;
 
   renderUpdates();
   window.addEventListener('hashchange', route);
   route();
+
+  // Lets the site open without signal after the first visit (works on https / GitHub Pages only).
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) navigator.serviceWorker.register('sw.js').catch(() => {});
 })(window.FOX);

@@ -66,13 +66,21 @@
 
   F.photoTile = (p, i) => '<button class="ph" data-photo="' + i + '" aria-label="' + esc(p.caption || 'Photo') + '"><img loading="lazy" src="' + esc(p.src) + '" alt="' + esc(p.caption || '') + '"></button>';
 
+  // Photo viewer: Close, previous/next buttons, arrow keys and swipe.
   F.bindPhotos = (root, list) => {
+    const d = F.$('#lightbox'); let cur = 0;
+    const show = (i) => {
+      cur = (i + list.length) % list.length; const p = list[cur];
+      d.innerHTML = '<img src="' + esc(p.src) + '" alt="' + esc(p.caption || '') + '"><p>' + esc(p.caption || '') + ' <small>(' + (cur + 1) + ' of ' + list.length + ')</small></p>' +
+        '<div class="row sp"><button data-nav="-1" aria-label="Previous photo">◀ Prev</button><form method="dialog"><button class="primary">Close</button></form><button data-nav="1" aria-label="Next photo">Next ▶</button></div>';
+      d.querySelectorAll('[data-nav]').forEach((b) => { b.onclick = () => show(cur + +b.dataset.nav); });
+    };
+    d.onkeydown = (e) => { if (e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'ArrowRight') show(cur + 1); };
+    let x0 = null;
+    d.ontouchstart = (e) => { x0 = e.touches[0].clientX; };
+    d.ontouchend = (e) => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 60) show(cur + (dx < 0 ? 1 : -1)); };
     root.querySelectorAll('[data-photo]').forEach((b) => {
-      b.onclick = () => {
-        const p = list[+b.dataset.photo]; const d = F.$('#lightbox');
-        d.innerHTML = '<img src="' + esc(p.src) + '" alt="' + esc(p.caption || '') + '"><p>' + esc(p.caption || '') + '</p><form method="dialog"><button class="primary">Close</button></form>';
-        d.showModal();
-      };
+      b.onclick = () => { show(+b.dataset.photo); d.showModal(); };
     });
   };
 

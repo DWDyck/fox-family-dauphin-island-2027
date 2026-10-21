@@ -61,6 +61,8 @@
       '<div id="map" role="application" aria-label="Interactive map of Dauphin Island"></div>' +
       '<h2>All places</h2><ul class="placelist">' + F.places.filter((l) => mapFilter === 'all' || l.type === mapFilter).map((l) => '<li><a href="#/map/' + esc(l.id) + '"><span aria-hidden="true">' + F.PLACE_TYPES[l.type][0] + '</span><span><b>' + esc(l.name) + '</b><br><small>' + esc(l.address || '') + '</small></span></a></li>').join('') + '</ul>';
     app.querySelectorAll('[data-f]').forEach((b) => { b.onclick = () => { mapFilter = b.dataset.f; P.map(app); }; });
+    F.loadLeaflet().then(() => {
+    if (!$('#map')) return;
     const map = L.map('map', { scrollWheelZoom: false }).setView([cfg.map.lat, cfg.map.lng], cfg.map.zoom);
     F.maps.push(map); tileLayer().addTo(map);
     const pts = []; let focusMarker;
@@ -75,7 +77,8 @@
       if (focus && l.id === focus) focusMarker = m;
     });
     if (focusMarker) { map.setView(focusMarker.getLatLng(), 15); focusMarker.openPopup(); $('#map').scrollIntoView({ block: 'start' }); } else if (pts.length) map.fitBounds(pts, { padding: [30, 30] });
-  };
+        }, () => { const el = $('#map'); if (el) el.outerHTML = '<p class="note">The map needs an internet connection. The list below still works, and each place has a Directions link on its house or event page.</p>'; });
+      };
 
   P.family = (app) => {
     const person = (f) => '<article class="card person">' + F.avatar(f) + '<div><h3>' + esc(f.name) + '</h3>' +
@@ -120,11 +123,15 @@
           '<div class="minimap" id="mm-' + esc(h.id) + '"></div>' +
           '<p class="row"><a class="btn" target="_blank" rel="noopener" href="' + F.mapsLink(h.address || h.name) + '">🧭 Directions</a><a class="btn" href="#/map/' + esc(h.id) + '">🗺️ On big map</a></p></article>';
       }).join('') || '<p class="empty">House not found.</p>');
-    hs.forEach((h) => {
-      const m = L.map('mm-' + h.id, { scrollWheelZoom: false }).setView([h.lat, h.lng], 15);
-      F.maps.push(m); tileLayer().addTo(m);
-      L.marker([h.lat, h.lng], { icon: pin('house', true) }).addTo(m);
-    });
+    const hs0 = hs;
+    F.loadLeaflet().then(() => {
+      hs0.forEach((h) => {
+        const el = document.getElementById('mm-' + h.id); if (!el) return;
+        const m = L.map(el, { scrollWheelZoom: false }).setView([h.lat, h.lng], 15);
+        F.maps.push(m); tileLayer().addTo(m);
+        L.marker([h.lat, h.lng], { icon: pin('house', true) }).addTo(m);
+      });
+    }, () => { app.querySelectorAll('.minimap').forEach((el) => { el.outerHTML = '<p class="note">Map needs an internet connection. Use the Directions button.</p>'; }); });
   };
 
   let album = 'all';

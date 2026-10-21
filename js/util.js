@@ -18,6 +18,17 @@
 
   F.sort = () => { F.events.sort((a, b) => a.date.localeCompare(b.date) || String(a.time).localeCompare(String(b.time))); };
 
+  // Leaflet (the map library) is only downloaded when a page needs it.
+  let leaflet;
+  F.loadLeaflet = () => {
+    if (window.L) return Promise.resolve();
+    return leaflet || (leaflet = new Promise((ok, fail) => {
+      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.append(css);
+      const s = document.createElement('script'); s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      s.onload = ok; s.onerror = () => { leaflet = null; fail(new Error('offline')); }; document.head.append(s);
+    }));
+  };
+
   // Houses are map places too, so events can point at either.
   F.places = [].concat(F.houses.map((h) => Object.assign({}, h, { type: 'house' })), F.locations);
   const index = (list) => list.reduce((m, x) => ((m[x.id] = x), m), {});
