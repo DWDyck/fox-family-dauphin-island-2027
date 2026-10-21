@@ -1,7 +1,7 @@
 /* One function per page. Each fills the <main> element. */
 (function (F) {
   const { esc, nl, $ } = F;
-  const P = (F.pages = {});
+  const P = (F.pages = F.pages || {});
   F.maps = [];
   const cfg = F.config;
 
@@ -10,15 +10,15 @@
 
   P.home = (app) => {
     const real = F.today();
-    const inTrip = real >= cfg.tripStart && real <= cfg.tripEnd;
-    const day = inTrip ? real : real < cfg.tripStart ? cfg.tripStart : cfg.tripEnd;
+    const inTrip = real >= F.trip.start && real <= F.trip.end;
+    const day = inTrip ? real : real < F.trip.start ? F.trip.start : F.trip.end;
     const todays = F.events.filter((e) => e.date === day);
     const meal = todays.find(F.isMeal) || F.events.find((e) => F.isMeal(e) && e.date > day);
     const feat = F.photos.find((p) => p.featured) || F.photos[0];
-    const note = inTrip ? '' : real < cfg.tripStart ? '<p>🌴 Only ' + F.daysBetween(real, cfg.tripStart) + ' days until the trip!</p>' : '<p>Thanks for a great week! See the Memories page.</p>';
+    const note = inTrip ? '' : real < F.trip.start ? '<p>🌴 Only ' + F.daysBetween(real, F.trip.start) + ' days until the trip!</p>' : '<p>Thanks for a great week! See the Memories page.</p>';
     app.innerHTML =
-      '<div class="hero"><h1>' + esc(cfg.welcome) + ' 🐚</h1><p>' + esc(F.parse(real).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })) + '</p>' + note + '</div>' +
-      '<h2 class="first">📅 Our week: ' + esc(F.shortDate(cfg.tripStart)) + ' – ' + esc(F.shortDate(cfg.tripEnd)) + '</h2>' + F.weekGrid() +
+      '<div class="hero"><h1>' + esc(cfg.welcome) + ' 🐚</h1><p>' + esc(F.fullDate(real)) + '</p>' + note + '</div>' +
+      '<h2 class="first">📅 Our week: ' + esc(F.shortDate(F.trip.start)) + ' – ' + esc(F.shortDate(F.trip.end)) + '</h2>' + F.weekGrid() +
       '<p><a class="btn primary" href="#/calendar">See detailed calendar →</a></p>' +
       (inTrip ? '<h2>What is happening today</h2>' + (todays.length ? todays.map((e) => F.eventCard(e)).join('') : '<p class="empty">Nothing planned today. Enjoy the beach! 🏖️</p>') : '') +
       (meal ? '<h2>🍽️ ' + (inTrip && todays.includes(meal) ? "Today's" : 'Next') + ' meal / gathering</h2>' + F.eventCard(meal, { showDate: true }) : '') +

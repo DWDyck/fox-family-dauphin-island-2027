@@ -130,3 +130,13 @@ h2.first{margin-top:.5rem}
 .wk-t{color:#0b4f66;font-weight:600}
 .wk-free{color:#666}
 @media(min-width:720px){.wk{grid-template-columns:1fr 1fr}}
+
+/* Data check page */
+.checklist{list-style:none;padding:0;margin:12px 0;display:grid;gap:6px}
+.checklist li{background:#fff;border-radius:12px;padding:10px 12px;border-left:6px solid var(--sea)}
+.checklist li.error{border-left-color:#b3261e}.checklist li.warn{border-left-color:var(--warn)}
+.checklist li span{font-weight:700;margin-right:4px}
+.tablewrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+.tbl th,.tbl td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--seaglass);white-space:nowrap}
+.tbl th{background:var(--seaglass);color:var(--ocean-d)}

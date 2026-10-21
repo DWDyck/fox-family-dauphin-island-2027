@@ -7,7 +7,7 @@
     const today = F.today();
     const u = F.updates.filter((x) => x.show !== false && (!x.until || x.until >= today));
     $('#updates').innerHTML = '<div class="banner" role="region" aria-label="Latest updates"><h2>📣 Latest Updates</h2>' +
-      (u.length ? '<ul>' + u.slice(0, 4).map((x) => '<li class="' + (x.important ? 'important' : '') + '">' + (x.important ? '⚠️ ' : '') + esc(x.text) + (x.date ? '<small>Posted ' + esc(F.shortDate(x.date)) + '</small>' : '') + '</li>').join('') + '</ul>' : '<p style="margin:0">No changes right now. Everything is on plan! 🎉</p>') + '</div>';
+      (u.length ? '<ul>' + u.slice(0, 4).map((x) => '<li class="' + (x.important ? 'important' : '') + '">' + (x.important ? '⚠️ ' : '') + esc(x.text) + (x.event && F.events.find((e) => e.id === x.event) ? '<small>Now: ' + esc(F.shortDate(F.events.find((e) => e.id === x.event).date)) + (F.events.find((e) => e.id === x.event).time ? ' · ' + esc(F.events.find((e) => e.id === x.event).time) : '') + (F.events.find((e) => e.id === x.event).location ? ' · ' + esc(F.place(F.events.find((e) => e.id === x.event).location).name) : '') + '</small>' : '') + (x.date ? '<small>Posted ' + esc(F.shortDate(x.date)) + '</small>' : '') + '</li>').join('') + '</ul>' : '<p style="margin:0">No changes right now. Everything is on plan! 🎉</p>') + '</div>';
   }
 
   function renderNav() {
@@ -16,7 +16,7 @@
       '<a href="#/more" class="more"' + (cur === '#/more' ? ' aria-current="page"' : '') + '><span aria-hidden="true">☰</span>More</a>';
   }
 
-  const TITLES = { home: 'Home', calendar: 'Calendar', map: 'Island Map', meals: 'Meals & Gatherings', houses: 'House Info', family: 'Family Directory', gallery: 'Photos', memories: 'Memories', more: 'Menu' };
+  const TITLES = { home: 'Home', calendar: 'Calendar', map: 'Island Map', meals: 'Meals & Gatherings', houses: 'House Info', family: 'Family Directory', gallery: 'Photos', memories: 'Memories', more: 'Menu', check: 'Data Check' };
   let first = true;
 
   function route() {
@@ -24,7 +24,7 @@
     const parts = (location.hash || '#/').replace(/^#\/?/, '').split('/');
     const name = F.pages[parts[0]] ? parts[0] : 'home';
     F.pages[name]($('#app'), parts[1]);
-    document.title = (name === 'home' ? '' : TITLES[name] + ' · ') + F.config.title;
+    document.title = (name === 'home' ? '' : TITLES[name] + ' · ') + F.siteName;
     renderNav();
     if (!(name === 'map' && parts[1])) window.scrollTo(0, 0);
     if (!first) $('#app').focus({ preventScroll: true });
@@ -41,7 +41,7 @@
   try { if (localStorage.getItem('fox-big')) setBig(true); } catch (e) {}
   $('#textsize').onclick = () => setBig(!big());
 
-  if (F.config.lastUpdated) $('#stamp').textContent = 'Last updated ' + F.config.lastUpdated;
+  if (F.config.lastUpdated) $('#stamp').textContent = 'Last updated ' + F.shortDate(F.config.lastUpdated);
 
   renderUpdates();
   window.addEventListener('hashchange', route);

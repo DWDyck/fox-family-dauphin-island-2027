@@ -1,11 +1,13 @@
-/* SITE SETTINGS - edit the dates and welcome text here. */
+/* SITE SETTINGS - names, text and map defaults.
+   Trip DATES are NOT here: they come from the days listed in schedule.js. */
 window.FOX = window.FOX || {};
 FOX.config = {
-  title: 'Fox Family Dauphin Island 2027',
-  tripStart: '2027-06-19',   // first day (YYYY-MM-DD)
-  tripEnd: '2027-06-26',     // last day
+  title: 'Fox Family Dauphin Island',   // site name; the year is added automatically
+  year: 2027,                           // every date in schedule.js must be in this year
+  timezone: 'America/Chicago',          // Dauphin Island time; decides what "today" means
+  welcome: 'Welcome, Fox Family!',
+  tagline: 'Everything for the week in one place.',
   weather: { lat: 30.2552, lng: -88.1097 },
   map: { lat: 30.2495, lng: -88.115, zoom: 12 },
-  welcome: 'Welcome, Fox Family!',
-  lastUpdated: 'June 2027'  // optional; shown in the footer
+  lastUpdated: '2027-06-17'             // YYYY-MM-DD of your latest edit; shown in the footer (optional)
 };
