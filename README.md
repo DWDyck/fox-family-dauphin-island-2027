@@ -1,8 +1,10 @@
 # Fox Family Dauphin Island 2027
 
-A static, mobile-first vacation hub. No Node, no build, no database. Open `index.html` locally, or host on GitHub Pages (Settings > Pages > `main` / root).
+## 🌐 Live site: [dwdike-maker.github.io/fox-family-dauphin-island-2027](https://dwdike-maker.github.io/fox-family-dauphin-island-2027/)
 
-Live: https://dwdike-maker.github.io/fox-family-dauphin-island-2027/
+> **About this project:** an experiment in using AI to build interesting web use cases. Here the use case is a family trip hub: schedule, houses, map, photos and memories in one installable, offline-capable page.
+
+A static, mobile-first vacation hub. No Node, no build, no database. Open `index.html` locally, or host on GitHub Pages (Settings > Pages > `main` / root).
 
 ## Where to update what
 
