@@ -1,38 +1,64 @@
-/* Reusable pieces of HTML: event cards, photo tiles, avatars, weather. */
+/* Reusable pieces of HTML: schedule rows, event/meal cards, the week view, photo tiles, weather. */
 (function (F) {
   const { esc, nl } = F;
+  const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
-  F.eventCard = (e, o) => {
+  F.whereOf = (e) => (e.location && F.place(e.location)) || null;
+  F.hostOf = (e) => (e.host && F.family(e.host)) || null;
+  F.mealLabel = (e) => (F.isDinner(e) ? 'Dinner' : cap(e.mealType || 'Meal'));
+  const tag = (cls, text) => '<span class="tag ' + cls + '">' + esc(text) + '</span>';
+  const tagsFor = (e) => (F.isMeal(e) ? tag('meal', F.mealLabel(e)) : e.category && e.category !== 'plan' && F.CATEGORIES[e.category] ? tag('cat', F.CATEGORIES[e.category]) : '') + (e.status === 'tentative' ? tag('tent', 'Tentative') : '');
+
+  // One line of the schedule: time, title, where and who. {detail:true} adds description, notes and a map link.
+  F.agendaRow = (e, o) => {
     o = o || {};
-    const l = e.location && F.place(e.location);
-    const h = e.host && F.family(e.host);
-    const cat = F.CATEGORIES[e.category] || F.CATEGORIES.plan;
-    return '<article class="card event ' + e.status + '">' +
-      '<div><span class="badge ' + e.status + '">' + (e.status === 'tentative' ? '⏳ Tentative' : '✔ Confirmed') + '</span><span class="badge">' + cat[0] + ' ' + cat[1] + '</span></div>' +
-      '<h3>' + esc(e.title) + '</h3>' +
-      '<div class="meta">' + (o.showDate ? esc(F.shortDate(e.date)) + ' · ' : '') + (e.time ? '🕒 ' + esc(e.time) : '') + '</div>' +
-      (l ? '<div class="meta">📍 <a class="pill-link" href="#/map/' + esc(l.id) + '">' + esc(l.name) + '</a></div>' : '') +
-      (h ? '<div class="meta">👤 Hosted by ' + esc(h.name) + '</div>' : '') +
-      (e.description ? '<p>' + nl(e.description) + '</p>' : '') +
-      (e.notes ? '<div class="note">📝 ' + nl(e.notes) + '</div>' : '') +
-      '<p><button data-ics="' + esc(e.id) + '">📲 Add to my calendar</button></p>' +
-      '</article>';
+    const l = F.whereOf(e), h = F.hostOf(e), tags = tagsFor(e);
+    const where = l ? (o.detail ? '<a class="pill-link" href="#/map/' + esc(l.id) + '">' + esc(l.name) + '</a>' : esc(l.name)) : '';
+    const meta = [where, h ? 'Hosted by ' + esc(h.name) : ''].filter(Boolean).join(' · ');
+    return '<li class="ag ' + e.status + (F.isDinner(e) ? ' dinner' : '') + '"><div class="ag-time">' + esc(e.time || 'TBD') + '</div><div class="ag-main"><div class="ag-title">' + esc(e.title) + '</div>' +
+      (tags ? '<div class="tags">' + tags + '</div>' : '') + (meta ? '<div class="ag-meta">' + meta + '</div>' : '') +
+      (o.detail && e.description ? '<p>' + nl(e.description) + '</p>' : '') + (o.detail && e.notes ? '<div class="note">' + nl(e.notes) + '</div>' : '') + '</div></li>';
   };
 
-  F.weekGrid = () => {
-    const cfg = F.config, today = F.today(), out = [];
-    F.days.forEach((day) => {
-      const d = day.date, evs = day.events;
-      const dt = F.parse(d);
-      out.push('<a class="wk-day' + (d === today ? ' today' : '') + '" href="#/calendar/' + d + '">' +
-        '<div class="wk-date"><b>' + dt.toLocaleDateString(undefined, { weekday: 'short' }) + '</b><span>' + dt.getDate() + '</span></div>' +
-        '<ul class="wk-ev">' + (evs.length ? evs.map((e) => {
-          const l = e.location && F.place(e.location);
-          return '<li class="' + e.status + '"><span class="wk-t">' + esc(e.time || '') + '</span> <strong>' + (F.isMeal(e) ? '🍽️ ' : '') + esc(e.title) + '</strong>' +
-            (e.status === 'tentative' ? ' <em class="badge tentative">Tentative</em>' : '') + (l ? '<small>📍 ' + esc(l.name) + '</small>' : '') + '</li>';
-        }).join('') : '<li class="wk-free">Free day – beach time 🏖️</li>') + '</ul></a>');
-    });
-    return '<div class="wk">' + out.join('') + '</div>';
+  // Shown on days with no dinner so gaps are obvious. A day can opt out (dinner:false) or explain (dinner:'text').
+  const dinnerGap = (day) => (day.dinner === false || F.dinnerOn(day.date) ? '' :
+    '<li class="ag dinner gap"><div class="ag-time">Dinner</div><div class="ag-main"><div class="ag-title">' + esc(day.dinner || 'Not planned yet') + '</div></div></li>');
+
+  F.dayList = (day, o) => {
+    const rows = day.events.map((e) => F.agendaRow(e, o)).join('') + dinnerGap(day);
+    return '<ul class="aglist">' + (rows || '<li class="ag free"><div class="ag-main"><div class="ag-title">Free day</div><div class="ag-meta">Nothing planned. Beach time.</div></div></li>') + '</ul>';
+  };
+
+  // Today / Tomorrow style card with full detail.
+  F.focusCard = (date, label) => {
+    const day = F.day(date);
+    return day ? '<section class="card focus"><p class="eyebrow">' + esc(label) + '</p><h3>' + esc(F.longDate(date)) + (day.title ? '<span class="wk-title">' + esc(day.title) + '</span>' : '') + '</h3>' + F.dayList(day, { detail: true }) + '</section>' : '';
+  };
+
+  // The whole trip, one block per day. This is the centerpiece of the home page.
+  F.weekView = () => {
+    const today = F.today();
+    return '<div class="wk">' + F.days.map((day) => {
+      const isToday = day.date === today, id = 'wd-' + day.date;
+      return '<section class="wk-day' + (isToday ? ' today' : '') + '" aria-labelledby="' + id + '">' +
+        '<a class="wk-date" href="#/calendar/' + day.date + '" aria-label="Details for ' + esc(F.longDate(day.date)) + '"><span class="wd">' + esc(F.weekdayShort(day.date)) + '</span><span class="dn">' + F.dayNum(day.date) + '</span><span class="mo">' + esc(F.monthShort(day.date)) + '</span></a>' +
+        '<div class="wk-body"><h3 id="' + id + '" class="wk-h">' + esc(F.weekday(day.date)) + (isToday ? tag('today', 'Today') : '') + (day.title ? '<span class="wk-title">' + esc(day.title) + '</span>' : '') + '</h3>' + F.dayList(day) + '</div></section>';
+    }).join('') + '</div>';
+  };
+
+  // Full card for any event. Meals get the same card, so dinners look the same everywhere.
+  F.eventCard = (e, o) => {
+    o = o || {};
+    const l = F.whereOf(e), h = F.hostOf(e), meal = F.isMeal(e);
+    const when = (o.showDate ? esc(F.longDate(e.date)) + ' at ' : '') + esc(e.time || 'Time to be announced');
+    const facts = (meal || l ? '<dt>Where</dt><dd>' + (l ? '<a class="pill-link" href="#/map/' + esc(l.id) + '">' + esc(l.name) + '</a>' + (l.address ? '<small>' + esc(l.address) + '</small>' : '') : 'To be announced') + '</dd>' : '') +
+      (h ? '<dt>' + (meal ? 'Host' : 'Host family') + '</dt><dd>' + esc(h.name) + '</dd>' : '');
+    return '<article class="card event ' + (meal ? 'meal ' : '') + e.status + (o.feature ? ' feature' : '') + '">' +
+      (o.eyebrow ? '<p class="eyebrow">' + esc(o.eyebrow) + '</p>' : '') +
+      '<div class="ev-head"><h3>' + esc(e.title) + '</h3><div class="tags">' + tagsFor(e) + '</div></div>' +
+      '<p class="when">' + when + '</p>' + (facts ? '<dl class="facts">' + facts + '</dl>' : '') +
+      (e.description ? '<p>' + nl(e.description) + '</p>' : '') + (e.notes ? '<div class="note"><b>Note:</b> ' + nl(e.notes) + '</div>' : '') +
+      '<p class="act"><button class="small" data-ics="' + esc(e.id) + '">Add to my calendar</button></p></article>';
   };
 
   F.toast = (m) => {
@@ -43,14 +69,14 @@
   // Builds a one-event .ics file so phones can add it to their own calendar.
   function ics(e) {
     const d = e.date.replace(/-/g, '');
-    const m = /(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i.exec(e.time || '');
-    const l = e.location && F.place(e.location);
+    const mins = F.minutes(e.time);
+    const l = F.whereOf(e);
     const esc2 = (s) => String(s || '').replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+    const p = (n) => String(n).padStart(2, '0');
     let when;
-    if (m) {
-      let h = +m[1] % 12 + (/pm/i.test(m[3]) ? 12 : 0);
-      const p = (n) => String(n).padStart(2, '0');
-      when = 'DTSTART:' + d + 'T' + p(h) + p(m[2] || 0) + '00\r\nDTEND:' + d + 'T' + p(Math.min(h + 1, 23)) + p(m[2] || 0) + '00';
+    if (mins != null) {
+      const end = Math.min(mins + 60, 23 * 60 + 59);
+      when = 'DTSTART:' + d + 'T' + p(Math.floor(mins / 60)) + p(mins % 60) + '00\r\nDTEND:' + d + 'T' + p(Math.floor(end / 60)) + p(end % 60) + '00';
     } else {
       when = 'DTSTART;VALUE=DATE:' + d;
     }
@@ -78,17 +104,17 @@
 
   F.avatar = (f) => f.photo
     ? '<img class="avatar" loading="lazy" src="' + esc(f.photo) + '" alt="' + esc(f.name) + '">'
-    : '<div class="avatar" aria-hidden="true">👪</div>';
+    : '<div class="avatar" aria-hidden="true">' + esc(F.initials(f.name)) + '</div>';
 
-  F.photoTile = (p, i) => '<button class="ph" data-photo="' + i + '" aria-label="' + esc(p.caption || 'Photo') + '"><img loading="lazy" src="' + esc(p.src) + '" alt="' + esc(p.caption || '') + '"></button>';
+  F.photoTile = (p, i) => '<button class="ph" data-photo="' + i + '" aria-label="' + esc((p.caption || 'Photo') + (p.date ? ', ' + F.shortDate(p.date) : '')) + '"><img loading="lazy" src="' + esc(p.src) + '" alt="' + esc(p.caption || '') + '"></button>';
 
   // Photo viewer: Close, previous/next buttons, arrow keys and swipe.
   F.bindPhotos = (root, list) => {
     const d = F.$('#lightbox'); let cur = 0;
     const show = (i) => {
       cur = (i + list.length) % list.length; const p = list[cur];
-      d.innerHTML = '<img src="' + esc(p.src) + '" alt="' + esc(p.caption || '') + '"><p>' + esc(p.caption || '') + ' <small>(' + (cur + 1) + ' of ' + list.length + ')</small></p>' +
-        '<div class="row sp"><button data-nav="-1" aria-label="Previous photo">◀ Prev</button><form method="dialog"><button class="primary">Close</button></form><button data-nav="1" aria-label="Next photo">Next ▶</button></div>';
+      d.innerHTML = '<img src="' + esc(p.src) + '" alt="' + esc(p.caption || '') + '"><p>' + esc(p.caption || '') + (p.date ? ' · ' + esc(F.shortDate(p.date)) : '') + ' <small>(' + (cur + 1) + ' of ' + list.length + ')</small></p>' +
+        '<div class="row sp"><button data-nav="-1" aria-label="Previous photo">Previous</button><form method="dialog"><button class="primary">Close</button></form><button data-nav="1" aria-label="Next photo">Next</button></div>';
       d.querySelectorAll('[data-nav]').forEach((b) => { b.onclick = () => show(cur + +b.dataset.nav); });
     };
     d.onkeydown = (e) => { if (e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'ArrowRight') show(cur + 1); };
@@ -100,14 +126,13 @@
     });
   };
 
-  const WX = { 0: ['☀️', 'Clear'], 1: ['🌤️', 'Mostly clear'], 2: ['⛅', 'Partly cloudy'], 3: ['☁️', 'Cloudy'], 45: ['🌫️', 'Fog'], 48: ['🌫️', 'Fog'], 51: ['🌦️', 'Drizzle'], 53: ['🌦️', 'Drizzle'], 55: ['🌦️', 'Drizzle'], 61: ['🌧️', 'Rain'], 63: ['🌧️', 'Rain'], 65: ['🌧️', 'Heavy rain'], 80: ['🌦️', 'Showers'], 81: ['🌦️', 'Showers'], 82: ['⛈️', 'Heavy showers'], 95: ['⛈️', 'Thunderstorms'], 96: ['⛈️', 'Thunderstorms'], 99: ['⛈️', 'Thunderstorms'] };
+  const WX = { 0: 'Clear', 1: 'Mostly clear', 2: 'Partly cloudy', 3: 'Cloudy', 45: 'Fog', 48: 'Fog', 51: 'Drizzle', 53: 'Drizzle', 55: 'Drizzle', 61: 'Rain', 63: 'Rain', 65: 'Heavy rain', 80: 'Showers', 81: 'Showers', 82: 'Heavy showers', 95: 'Thunderstorms', 96: 'Thunderstorms', 99: 'Thunderstorms' };
   F.weather = (el) => {
     const w = F.config.weather;
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + w.lat + '&longitude=' + w.lng + '&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago&forecast_days=3')
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + w.lat + '&longitude=' + w.lng + '&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=' + encodeURIComponent(F.config.timezone) + '&forecast_days=4')
       .then((r) => r.json()).then((d) => {
-        const x = WX[d.current.weather_code] || ['🌡️', 'Weather'];
-        el.innerHTML = '<div class="weather"><div class="big" aria-hidden="true">' + x[0] + '</div><div><div class="t">' + Math.round(d.current.temperature_2m) + '°F</div><div>' + x[1] + ' · wind ' + Math.round(d.current.wind_speed_10m) + ' mph</div>' +
-          '<div class="meta">Today: ' + Math.round(d.daily.temperature_2m_min[0]) + '–' + Math.round(d.daily.temperature_2m_max[0]) + '°F · ' + d.daily.precipitation_probability_max[0] + '% rain</div></div></div>';
+        const days = d.daily.time.map((t, i) => '<li><b>' + (i === 0 ? 'Today' : esc(F.weekdayShort(t))) + '</b>' + Math.round(d.daily.temperature_2m_max[i]) + '° / ' + Math.round(d.daily.temperature_2m_min[i]) + '°<small>' + d.daily.precipitation_probability_max[i] + '% rain</small></li>').join('');
+        el.innerHTML = '<div class="weather"><div class="t">' + Math.round(d.current.temperature_2m) + '°F</div><div><div><b>' + (WX[d.current.weather_code] || 'Weather') + '</b></div><div class="meta">Wind ' + Math.round(d.current.wind_speed_10m) + ' mph</div></div></div><ul class="wx-days">' + days + '</ul>';
       }).catch(() => { el.innerHTML = '<p class="empty">Weather is unavailable right now.</p>'; });
   };
 })(window.FOX);

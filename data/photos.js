@@ -2,7 +2,8 @@
    1. Copy photos into the images/ folder (resize big phone photos to ~1600px wide first).
    2. Add a line below.
    album must match a name in the albums list. featured:true shows on the home page.
-   favorite:true also shows on the Memories page. */
+   favorite:true also shows on the Memories page.
+   date (optional, YYYY-MM-DD) must be a real date; #/check validates it. */
 FOX.albums = ['Beach Days', 'Family Dinners', 'Fishing Trips', 'Group Photos', 'Kids & Grandkids', 'Favorite Moments'];
 
 FOX.photos = [

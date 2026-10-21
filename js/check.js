@@ -5,7 +5,7 @@
   const add = (level, where, msg) => out.push({ level, where, msg });
   const iso = (s) => /^\d{4}-\d\d-\d\d$/.test(s || '') && F.ymd(F.parse(s)) === s;
   const nice = (s) => (iso(s) ? F.shortDate(s) : String(s));
-  const CATS = Object.keys(F.CATEGORIES), MEALS = Object.keys(F.MEAL_ICONS);
+  const CATS = Object.keys(F.CATEGORIES), MEALS = F.MEAL_TYPES;
   const dupes = (list, f) => list.map(f).filter((v, i, a) => v && a.indexOf(v) !== i);
 
   // Dates in the schedule

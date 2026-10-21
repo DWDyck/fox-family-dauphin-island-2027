@@ -29,9 +29,30 @@
   };
   F.siteName = F.config.title + ' ' + F.config.year;
 
-  F.CATEGORIES = { plan: ['📌', 'Plan'], meal: ['🍽️', 'Family Meal'], excursion: ['⛵', 'Excursion'], beach: ['🏖️', 'Beach Activity'], arrival: ['🚗', 'Arrival Day'], departure: ['👋', 'Departure Day'] };
-  F.PLACE_TYPES = { house: ['🏠', 'Family Houses'], restaurant: ['🍤', 'Restaurants'], grocery: ['🛒', 'Groceries'], beach: ['🏖️', 'Beach Access'], activity: ['⛵', 'Activities'], gathering: ['🍽️', 'Meal Spots'] };
-  F.MEAL_ICONS = { breakfast: '🥞', lunch: '🥪', dinner: '🍝', 'seafood boil': '🦐', cookout: '🍔', celebration: '🎉', gathering: '🧺' };
+  F.CATEGORIES = { plan: 'Plan', meal: 'Family Meal', excursion: 'Excursion', beach: 'Beach Activity', arrival: 'Arrival Day', departure: 'Departure Day' };
+  F.PLACE_TYPES = { house: ['house', 'Family Houses'], restaurant: ['restaurant', 'Restaurants'], grocery: ['grocery', 'Groceries'], beach: ['beach', 'Beach Access'], activity: ['activity', 'Activities'], gathering: ['gathering', 'Meal Spots'] };
+  F.MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'seafood boil', 'cookout', 'celebration', 'gathering'];
+  F.monthShort = (s) => fmt(s, { month: 'short' });
+  F.initials = (name) => { const w = String(name || '').split(/\s+/).filter((x) => /[A-Za-z]/.test(x)); return ((w[0] || '?')[0] + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase(); };
+
+  // One small icon set (outline style) used instead of emoji. Decorative: always hidden from screen readers.
+  const ICONS = {
+    home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    map: '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',
+    restaurant: '<path d="M6 3v7a2 2 0 0 0 4 0V3M8 3v18"/><path d="M17 3c-2.5 2-3 5-3 8h3v10"/>',
+    key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>',
+    users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 21c0-4 3-6.5 6.5-6.5s6.5 2.5 6.5 6.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17.5 14.5c2.5 0 4.5 1.8 4.5 5"/>',
+    photo: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M3 18l6-5 4 3 3-2 5 4"/>',
+    heart: '<path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    house: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+    grocery: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12H19l2-8H6"/>',
+    beach: '<circle cx="12" cy="8" r="3.5"/><path d="M2 17q2.5-3 5 0t5 0 5 0 5 0M2 21q2.5-3 5 0t5 0 5 0 5 0"/>',
+    activity: '<circle cx="12" cy="5" r="2"/><path d="M12 7v14M8 11h8M5 14c0 4 3 7 7 7s7-3 7-7"/>',
+    gathering: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>'
+  };
+  F.icon = (n) => '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[n] || '') + '</svg>';
 
 
   // Leaflet (the map library) is only downloaded when a page needs it.
@@ -43,6 +64,30 @@
       const s = document.createElement('script'); s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
       s.onload = ok; s.onerror = () => { leaflet = null; fail(new Error('offline')); }; document.head.append(s);
     }));
+  };
+
+  // Map pins need lat/lng. If a house or place has only an address, look it up once (OpenStreetMap Nominatim),
+  // remember the answer on this device, and be polite: one lookup per 1.1 seconds.
+  const hasLL = (p) => typeof p.lat === 'number' && typeof p.lng === 'number';
+  F.hasCoords = hasLL;
+  const geoCache = () => { try { return JSON.parse(localStorage.getItem('fox-geo') || '{}'); } catch (e) { return {}; } };
+  F.geocode = (places, alive, found) => {
+    const todo = places.filter((p) => !hasLL(p) && p.address);
+    const next = () => {
+      const p = todo.shift();
+      if (!p || !alive()) return;
+      const cache = geoCache();
+      if (cache[p.address]) { found(p, cache[p.address]); return next(); }
+      fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(p.address))
+        .then((r) => r.json()).then((r) => {
+          if (r && r[0]) {
+            const ll = [+r[0].lat, +r[0].lon]; cache[p.address] = ll;
+            try { localStorage.setItem('fox-geo', JSON.stringify(cache)); } catch (e) {}
+            if (alive()) found(p, ll);
+          }
+        }).catch(() => {}).then(() => setTimeout(next, 1100));
+    };
+    next();
   };
 
   // Houses are map places too, so events can point at either.

@@ -1,49 +1,46 @@
 # Fox Family Dauphin Island 2027
 
-A simple, mobile-first vacation hub: today's plans, calendar, meals, houses, family directory, map, photos and memories.
-**100% static** - no Node, no build, no database. Works by opening `index.html` and deploys as-is to GitHub Pages.
+A static, mobile-first vacation hub. No Node, no build, no database. Open `index.html` locally, or host on GitHub Pages (Settings > Pages > `main` / root).
 
-## File structure
+Live: https://dwdike-maker.github.io/fox-family-dauphin-island-2027/
+
+## Where to update what
+
+| To change... | Edit |
+|---|---|
+| Events, meals, dinners, trip dates | `data/schedule.js` (the only place dates live) |
+| Latest Updates banner | `data/updates.js` |
+| Houses (address, Wi-Fi, codes, lat/lng) | `data/houses.js` |
+| Restaurants, stores, beaches, activities on the map | `data/locations.js` |
+| Families and who stays where | `data/families.js` |
+| Photos and albums | `data/photos.js` + files in `images/` |
+| Memories | `data/memories.js` |
+| Title, year, welcome text, weather, timezone | `data/config.js` |
+
+After editing, commit and push; Pages updates in 1-2 minutes. Bump `VERSION` in `sw.js` if phones keep showing old content.
+
+## Schedule model (`data/schedule.js`)
+
+Each day is `{ date: 'YYYY-MM-DD', title, dinner?, events: [...] }`. The day's `date` is the only date; events do not repeat it. Trip start/end and day count are derived from the first and last day. Event fields: `title, time, category, status ('confirmed' | 'tentative'), location, host, mealType, description, notes, id`. Set `dinner: false` for a day with no dinner, or `dinner: 'text'` to show a note instead of "Not planned yet". A meal at 3 PM or later (not breakfast/lunch) counts as dinner.
+
+## Checks and previews
+
+- `#/check` (footer link "Data check") validates dates, weekdays, ids, hosts, locations and lists dinner gaps. Open it after every edit.
+- `?today=2027-06-22` before the `#` previews the site as if it were that day, e.g. `index.html?today=2027-06-22`.
+
+## Real house addresses
+
+In `data/houses.js` replace the `address`, then delete `lat`/`lng`. The map looks the address up (needs internet) and caches the result in the browser. Or paste exact coordinates to skip lookup.
+
+## Privacy
+
+This repo is public. Do not commit real door, gate or Wi-Fi codes unless you accept that anyone can read them.
+
+## Structure
+
 ```
-index.html            page shell (header, banner, nav, script tags)
-styles.css            all styling (coastal theme, print styles)
-sw.js                 optional offline cache (only active on https)
-manifest.webmanifest  lets phones "Add to Home Screen"
-data/                 <-- THE ONLY FILES YOU NORMALLY EDIT
-  config.js           trip dates, welcome text, map center, "last updated"
-  updates.js          Latest Updates banner
-  events.js           calendar + meals
-  houses.js           rental houses (also become map pins)
-  locations.js        restaurants, groceries, beaches, activities
-  families.js         family directory
-  photos.js           albums + gallery photos
-  memories.js         highlights, stories, moments
-images/               photos and icons you add
-js/
-  util.js             helpers, lookups, lazy Leaflet loader
-  components.js       event cards, gallery viewer, weather, add-to-calendar, copy buttons
-  pages.js            one function per page
-  app.js              router, nav, updates banner, text-size toggle
+index.html  styles.css  sw.js  manifest.webmanifest
+data/   config, updates, houses, locations, families, schedule, photos, memories
+js/     util (dates, icons, helpers), components, check, pages, app (router/nav)
+images/
 ```
-
-## How to update the site
-1. Open the file in `data/` in any text editor (each one starts with a comment explaining the fields).
-2. Copy an existing line, change the text, save.
-3. Open `index.html` in a browser to check it, then commit and push to GitHub. The site updates in about a minute.
-
-Common jobs:
-- **Post a change**: add a line at the top of `data/updates.js`.
-- **Tentative -> confirmed**: change `status: 'tentative'` to `'confirmed'` in `data/events.js`.
-- **Add a photo**: put the file in `images/`, add a line to `data/photos.js`.
-- **Real house info**: edit `data/houses.js`. NOTE: if the repository is public, door/Wi-Fi codes are public. Make the repo private (GitHub Pages then needs a paid plan) or keep codes out of it.
-
-## Run locally
-Double-click `index.html`. (The map and weather need internet.)
-
-## Deploy to GitHub Pages
-Repository -> Settings -> Pages -> Source: "Deploy from a branch" -> `main` / `(root)`. The site appears at `https://<user>.github.io/<repo>/`. A custom domain can be added on the same page.
-
-## Notes
-- Navigation uses `#/page` links, so no server rewrites are needed.
-- Map: Leaflet + OpenStreetMap (downloaded only when the map is opened). Weather: Open-Meteo. Neither needs a key.
-- If you change site code after people have visited, bump `VERSION` in `sw.js`.
