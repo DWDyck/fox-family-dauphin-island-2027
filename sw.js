@@ -1,6 +1,6 @@
 /* Keeps the site available with spotty signal: network first, cached copy as backup.
    Bump VERSION if you ever need to force everyone to refresh. */
-const VERSION = 'fox-2027-v1';
+const VERSION = 'fox-2027-v2';
 const CORE = ['./', 'index.html', 'styles.css', 'js/util.js', 'js/components.js', 'js/pages.js', 'js/app.js',
   'data/config.js', 'data/updates.js', 'data/houses.js', 'data/locations.js', 'data/families.js', 'data/events.js', 'data/photos.js', 'data/memories.js'];
 

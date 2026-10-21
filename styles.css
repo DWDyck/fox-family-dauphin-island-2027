@@ -114,3 +114,19 @@ dialog form{margin:0;display:contents}
 @media(min-width:720px){.foot{order:9;width:100%}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media print{.top,.tabs,.banner button,.textsize,.chips,#jump,button,.foot,.skip{display:none!important}body{background:#fff;padding:0}.card{box-shadow:none;border:1px solid #ccc;break-inside:avoid}.minimap{display:none}}
+
+/* This-week grid on home */
+h2.first{margin-top:.5rem}
+.wk{display:grid;gap:.5rem}
+.wk-day{display:flex;gap:.75rem;align-items:flex-start;background:#fff;border:1px solid #d8e6ea;border-radius:14px;padding:.7rem .8rem;color:inherit;text-decoration:none;min-height:3.5rem}
+.wk-day.today{border:2px solid #0e6f8c;background:#e9f6f8}
+.wk-date{min-width:3.2rem;text-align:center;color:#0b4f66}
+.wk-date b{display:block;font-size:.85rem;text-transform:uppercase}
+.wk-date span{font-size:1.6rem;font-weight:700}
+.wk-ev{list-style:none;margin:0;padding:0;flex:1}
+.wk-ev li{padding:.2rem 0}
+.wk-ev li.tentative{border-left:3px dashed #d9822b;padding-left:.5rem}
+.wk-ev small{display:block;color:#555}
+.wk-t{color:#0b4f66;font-weight:600}
+.wk-free{color:#666}
+@media(min-width:720px){.wk{grid-template-columns:1fr 1fr}}

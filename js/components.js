@@ -19,6 +19,22 @@
       '</article>';
   };
 
+  F.weekGrid = () => {
+    const cfg = F.config, today = F.today(), out = [];
+    for (let d = cfg.tripStart; d <= cfg.tripEnd; d = F.ymd(new Date(F.parse(d).getTime() + 90000000))) {
+      const evs = F.events.filter((e) => e.date === d);
+      const dt = F.parse(d);
+      out.push('<a class="wk-day' + (d === today ? ' today' : '') + '" href="#/calendar/' + d + '">' +
+        '<div class="wk-date"><b>' + dt.toLocaleDateString(undefined, { weekday: 'short' }) + '</b><span>' + dt.getDate() + '</span></div>' +
+        '<ul class="wk-ev">' + (evs.length ? evs.map((e) => {
+          const l = e.location && F.place(e.location);
+          return '<li class="' + e.status + '"><span class="wk-t">' + esc(e.time || '') + '</span> <strong>' + (F.isMeal(e) ? '🍽️ ' : '') + esc(e.title) + '</strong>' +
+            (e.status === 'tentative' ? ' <em class="badge tentative">Tentative</em>' : '') + (l ? '<small>📍 ' + esc(l.name) + '</small>' : '') + '</li>';
+        }).join('') : '<li class="wk-free">Free day – beach time 🏖️</li>') + '</ul></a>');
+    }
+    return '<div class="wk">' + out.join('') + '</div>';
+  };
+
   F.toast = (m) => {
     const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = m;
     document.body.append(t); setTimeout(() => t.remove(), 2500);

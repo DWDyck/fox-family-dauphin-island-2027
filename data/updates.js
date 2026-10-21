@@ -5,6 +5,6 @@
    until:      last day to show it, YYYY-MM-DD (optional - hides automatically)
    show:       false hides it without deleting (optional) */
 FOX.updates = [
-  { date: '2027-06-10', text: 'Sample update: Seafood boil is at Fox House at 6:00 PM.', important: true },
-  { date: '2027-06-09', text: 'Sample update: Dolphin cruise is tentative, final call by 8 AM that morning.', until: '2027-06-15' }
+  { date: '2027-06-17', text: 'Sample update: Seafood boil is at Fox House at 6:00 PM.', important: true },
+  { date: '2027-06-16', text: 'Sample update: Dolphin cruise is tentative, final call by 8 AM that morning.', until: '2027-06-22' }
 ];

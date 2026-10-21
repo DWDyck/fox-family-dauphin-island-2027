@@ -13,25 +13,23 @@
     const inTrip = real >= cfg.tripStart && real <= cfg.tripEnd;
     const day = inTrip ? real : real < cfg.tripStart ? cfg.tripStart : cfg.tripEnd;
     const todays = F.events.filter((e) => e.date === day);
-    const upcoming = F.events.filter((e) => e.date > day).slice(0, 4);
     const meal = todays.find(F.isMeal) || F.events.find((e) => F.isMeal(e) && e.date > day);
     const feat = F.photos.find((p) => p.featured) || F.photos[0];
-    const note = inTrip ? '' : real < cfg.tripStart ? '<p>🌴 Only ' + F.daysBetween(real, cfg.tripStart) + ' days until the trip! Here is what Day 1 looks like.</p>' : '<p>Thanks for a great week! See the Memories page.</p>';
+    const note = inTrip ? '' : real < cfg.tripStart ? '<p>🌴 Only ' + F.daysBetween(real, cfg.tripStart) + ' days until the trip!</p>' : '<p>Thanks for a great week! See the Memories page.</p>';
     app.innerHTML =
       '<div class="hero"><h1>' + esc(cfg.welcome) + ' 🐚</h1><p>' + esc(F.parse(real).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })) + '</p>' + note + '</div>' +
-      '<div class="quick">' + F.NAV.filter((n) => n[0] !== '#/').map((n) => '<a href="' + n[0] + '"><span aria-hidden="true">' + n[1] + '</span>' + n[2] + '</a>').join('') + '</div>' +
-      '<h2>' + (inTrip ? "What's happening today" : 'Day 1 – ' + esc(F.longDate(day))) + '</h2>' +
-      (todays.length ? todays.map((e) => F.eventCard(e)).join('') : '<p class="empty">Nothing planned today. Enjoy the beach! 🏖️</p>') +
-      (meal ? '<h2>🍽️ Meal / gathering highlight</h2>' + F.eventCard(meal, { showDate: true }) : '') +
-      '<h2>Coming up</h2>' + (upcoming.length ? upcoming.map((e) => F.eventCard(e, { showDate: true })).join('') : '<p class="empty">No more events yet.</p>') +
-      '<p><a class="btn" href="#/calendar">See full calendar →</a></p>' +
+      '<h2 class="first">📅 Our week: ' + esc(F.shortDate(cfg.tripStart)) + ' – ' + esc(F.shortDate(cfg.tripEnd)) + '</h2>' + F.weekGrid() +
+      '<p><a class="btn primary" href="#/calendar">See detailed calendar →</a></p>' +
+      (inTrip ? '<h2>What is happening today</h2>' + (todays.length ? todays.map((e) => F.eventCard(e)).join('') : '<p class="empty">Nothing planned today. Enjoy the beach! 🏖️</p>') : '') +
+      (meal ? '<h2>🍽️ ' + (inTrip && todays.includes(meal) ? "Today's" : 'Next') + ' meal / gathering</h2>' + F.eventCard(meal, { showDate: true }) : '') +
+      '<div class="quick">' + F.NAV.filter((n) => n[0] !== '#/' && n[0] !== '#/calendar').map((n) => '<a href="' + n[0] + '"><span aria-hidden="true">' + n[1] + '</span>' + n[2] + '</a>').join('') + '</div>' +
       '<h2>🌤️ Dauphin Island weather</h2><div class="card" id="wx"><p class="loading">Checking the sky…</p></div>' +
       (feat ? '<h2>📷 Featured photo</h2><img class="featured" src="' + esc(feat.src) + '" alt="' + esc(feat.caption || 'Featured family photo') + '">' + (feat.caption ? '<p class="cap">' + esc(feat.caption) + '</p>' : '') : '');
     F.weather($('#wx'));
   };
 
   let calFilter = 'all';
-  P.calendar = (app) => {
+  P.calendar = (app, focus) => {
     const f = {
       all: () => true, confirmed: (e) => e.status === 'confirmed', tentative: (e) => e.status === 'tentative',
       meal: F.isMeal, excursion: (e) => e.category === 'excursion', beach: (e) => e.category === 'beach',
@@ -46,12 +44,10 @@
           '<div class="chips" role="group" aria-label="Filter events">' + Object.keys(labels).map((k) => '<button class="chip" aria-pressed="' + (calFilter === k) + '" data-f="' + k + '">' + labels[k] + '</button>').join('') + '</div>' +
       (days.length ? days.map((d) => '<div class="day ' + (d === today ? 'today' : '') + '" id="d-' + d + '">' + esc(F.longDate(d)) + (d === today ? ' · TODAY' : '') + '</div>' + list.filter((e) => e.date === d).map((e) => F.eventCard(e)).join('')).join('') : '<p class="empty">No events in this view yet.</p>');
     app.querySelectorAll('[data-f]').forEach((b) => { b.onclick = () => { calFilter = b.dataset.f; P.calendar(app); }; });
-        $('#jump').onclick = () => {
-          const next = days.find((d) => d >= today);
-          const el = next && document.getElementById('d-' + next);
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); else F.toast('No upcoming events in this view.');
-        };
-      };
+    const goto = (d) => { const el = d && document.getElementById('d-' + d); if (el) el.scrollIntoView({ block: 'start' }); return !!el; };
+    $('#jump').onclick = () => { if (!goto(days.find((d) => d >= today))) F.toast('No upcoming events in this view.'); };
+    if (focus) goto(focus);
+  };
 
   let mapFilter = 'all';
   P.map = (app, focus) => {
