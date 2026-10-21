@@ -90,3 +90,9 @@ input[type=checkbox]{width:28px;height:28px;min-height:0}
 @media(prefers-reduced-motion:no-preference){.card{transition:transform .15s}}
 .tabs a.desk{display:none}
 @media(min-width:720px){.tabs a.desk{display:flex}.tabs{flex-wrap:wrap}}
+.small{min-height:36px;padding:2px 12px;font-size:.85rem}
+.placelist{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.placelist a{display:flex;gap:12px;align-items:center;background:#fff;border-radius:var(--r);padding:12px;text-decoration:none;color:var(--ink);min-height:56px}
+.placelist a span:first-child{font-size:1.6rem}
+.placelist small{color:var(--drift)}
+.banner li.important{color:#8a2a00}

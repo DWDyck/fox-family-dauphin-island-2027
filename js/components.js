@@ -15,8 +15,50 @@
       (h ? '<div class="meta">👤 Hosted by ' + esc(h.name) + '</div>' : '') +
       (e.description ? '<p>' + nl(e.description) + '</p>' : '') +
       (e.notes ? '<div class="note">📝 ' + nl(e.notes) + '</div>' : '') +
+      '<p><button data-ics="' + esc(e.id) + '">📲 Add to my calendar</button></p>' +
       '</article>';
   };
+
+  F.toast = (m) => {
+    const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = m;
+    document.body.append(t); setTimeout(() => t.remove(), 2500);
+  };
+
+  // Builds a one-event .ics file so phones can add it to their own calendar.
+  function ics(e) {
+    const d = e.date.replace(/-/g, '');
+    const m = /(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i.exec(e.time || '');
+    const l = e.location && F.place(e.location);
+    const esc2 = (s) => String(s || '').replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n');
+    let when;
+    if (m) {
+      let h = +m[1] % 12 + (/pm/i.test(m[3]) ? 12 : 0);
+      const p = (n) => String(n).padStart(2, '0');
+      when = 'DTSTART:' + d + 'T' + p(h) + p(m[2] || 0) + '00\r\nDTEND:' + d + 'T' + p(Math.min(h + 1, 23)) + p(m[2] || 0) + '00';
+    } else {
+      when = 'DTSTART;VALUE=DATE:' + d;
+    }
+    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Fox Family//Dauphin Island//EN', 'BEGIN:VEVENT', 'UID:' + e.id + '@fox-family-dauphin-island', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]|\.\d+/g, ''),
+      when, 'SUMMARY:' + esc2(e.title + (e.status === 'tentative' ? ' (tentative)' : '')), 'LOCATION:' + esc2(l ? l.name + ', ' + (l.address || '') : ''), 'DESCRIPTION:' + esc2([e.description, e.notes].filter(Boolean).join('\n')), 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  }
+
+  document.addEventListener('click', (ev) => {
+    const a = ev.target.closest('[data-ics]');
+    if (a) {
+      const e = F.events.find((x) => x.id === a.dataset.ics); if (!e) return;
+      const url = URL.createObjectURL(new Blob([ics(e)], { type: 'text/calendar' }));
+      const link = document.createElement('a'); link.href = url; link.download = e.id + '.ics'; document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return;
+    }
+    const c = ev.target.closest('[data-copy]');
+    if (c) {
+      const v = c.dataset.copy;
+      const done = () => F.toast('Copied: ' + v);
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(v).then(done, done);
+      else { const t = document.createElement('textarea'); t.value = v; document.body.append(t); t.select(); try { document.execCommand('copy'); } catch (x) {} t.remove(); done(); }
+    }
+  });
 
   F.avatar = (f) => f.photo
     ? '<img class="avatar" loading="lazy" src="' + esc(f.photo) + '" alt="' + esc(f.name) + '">'

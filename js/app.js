@@ -4,9 +4,10 @@
   F.NAV = [['#/', '🏠', 'Home', 'm'], ['#/calendar', '📅', 'Calendar', 'm'], ['#/map', '🗺️', 'Map', 'm'], ['#/meals', '🍽️', 'Meals', 'm'], ['#/houses', '🔑', 'Houses', 'd'], ['#/family', '👨‍👩‍👧', 'Family', 'd'], ['#/gallery', '📷', 'Photos', 'd'], ['#/memories', '💙', 'Memories', 'd']];
 
   function renderUpdates() {
-    const u = F.updates.filter((x) => x.show !== false);
+    const today = F.today();
+    const u = F.updates.filter((x) => x.show !== false && (!x.until || x.until >= today));
     $('#updates').innerHTML = '<div class="banner" role="region" aria-label="Latest updates"><h2>📣 Latest Updates</h2>' +
-      (u.length ? '<ul>' + u.slice(0, 4).map((x) => '<li>' + esc(x.text) + (x.date ? '<small>' + esc(F.shortDate(x.date)) + '</small>' : '') + '</li>').join('') + '</ul>' : '<p style="margin:0">No changes right now. Everything is on plan! 🎉</p>') + '</div>';
+      (u.length ? '<ul>' + u.slice(0, 4).map((x) => '<li class="' + (x.important ? 'important' : '') + '">' + (x.important ? '⚠️ ' : '') + esc(x.text) + (x.date ? '<small>Posted ' + esc(F.shortDate(x.date)) + '</small>' : '') + '</li>').join('') + '</ul>' : '<p style="margin:0">No changes right now. Everything is on plan! 🎉</p>') + '</div>';
   }
 
   function renderNav() {

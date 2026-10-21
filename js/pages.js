@@ -42,17 +42,24 @@
     const days = list.map((e) => e.date).filter((d, i, a) => a.indexOf(d) === i);
     const today = F.today();
     app.innerHTML = '<h1>📅 Vacation Calendar</h1><p class="sub">Dashed orange = tentative. Plans may change; check Latest Updates above.</p>' +
-      '<div class="chips" role="group" aria-label="Filter events">' + Object.keys(labels).map((k) => '<button class="chip" aria-pressed="' + (calFilter === k) + '" data-f="' + k + '">' + labels[k] + '</button>').join('') + '</div>' +
-      (days.length ? days.map((d) => '<div class="day ' + (d === today ? 'today' : '') + '">' + esc(F.longDate(d)) + (d === today ? ' · TODAY' : '') + '</div>' + list.filter((e) => e.date === d).map((e) => F.eventCard(e)).join('')).join('') : '<p class="empty">No events in this view yet.</p>');
+          '<p><button class="primary" id="jump">📍 Jump to today</button></p>' +
+          '<div class="chips" role="group" aria-label="Filter events">' + Object.keys(labels).map((k) => '<button class="chip" aria-pressed="' + (calFilter === k) + '" data-f="' + k + '">' + labels[k] + '</button>').join('') + '</div>' +
+      (days.length ? days.map((d) => '<div class="day ' + (d === today ? 'today' : '') + '" id="d-' + d + '">' + esc(F.longDate(d)) + (d === today ? ' · TODAY' : '') + '</div>' + list.filter((e) => e.date === d).map((e) => F.eventCard(e)).join('')).join('') : '<p class="empty">No events in this view yet.</p>');
     app.querySelectorAll('[data-f]').forEach((b) => { b.onclick = () => { calFilter = b.dataset.f; P.calendar(app); }; });
-  };
+        $('#jump').onclick = () => {
+          const next = days.find((d) => d >= today);
+          const el = next && document.getElementById('d-' + next);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); else F.toast('No upcoming events in this view.');
+        };
+      };
 
   let mapFilter = 'all';
   P.map = (app, focus) => {
     app.innerHTML = '<h1>🗺️ Island Map</h1><p class="sub">Tap a pin for address and events. Orange pins are our houses.</p>' +
       '<div class="chips" role="group" aria-label="Filter places"><button class="chip" aria-pressed="' + (mapFilter === 'all') + '" data-f="all">All</button>' +
       Object.keys(F.PLACE_TYPES).map((k) => '<button class="chip" aria-pressed="' + (mapFilter === k) + '" data-f="' + k + '">' + F.PLACE_TYPES[k][0] + ' ' + F.PLACE_TYPES[k][1] + '</button>').join('') + '</div>' +
-      '<div id="map" role="application" aria-label="Interactive map of Dauphin Island"></div>';
+      '<div id="map" role="application" aria-label="Interactive map of Dauphin Island"></div>' +
+      '<h2>All places</h2><ul class="placelist">' + F.places.filter((l) => mapFilter === 'all' || l.type === mapFilter).map((l) => '<li><a href="#/map/' + esc(l.id) + '"><span aria-hidden="true">' + F.PLACE_TYPES[l.type][0] + '</span><span><b>' + esc(l.name) + '</b><br><small>' + esc(l.address || '') + '</small></span></a></li>').join('') + '</ul>';
     app.querySelectorAll('[data-f]').forEach((b) => { b.onclick = () => { mapFilter = b.dataset.f; P.map(app); }; });
     const map = L.map('map', { scrollWheelZoom: false }).setView([cfg.map.lat, cfg.map.lng], cfg.map.zoom);
     F.maps.push(map); tileLayer().addTo(map);
@@ -67,35 +74,44 @@
       pts.push([l.lat, l.lng]);
       if (focus && l.id === focus) focusMarker = m;
     });
-    if (focusMarker) { map.setView(focusMarker.getLatLng(), 15); focusMarker.openPopup(); } else if (pts.length) map.fitBounds(pts, { padding: [30, 30] });
+    if (focusMarker) { map.setView(focusMarker.getLatLng(), 15); focusMarker.openPopup(); $('#map').scrollIntoView({ block: 'start' }); } else if (pts.length) map.fitBounds(pts, { padding: [30, 30] });
   };
 
   P.family = (app) => {
-    app.innerHTML = '<h1>👨‍👩‍👧 Who is Staying Where</h1><div class="grid">' + F.families.map((f) => {
-      const h = f.house && F.house(f.house);
-      return '<article class="card person">' + F.avatar(f) + '<div><h3>' + esc(f.name) + '</h3>' +
-        (f.members && f.members.length ? '<p>' + esc(f.members.join(', ')) + '</p>' : '') +
-        (h ? '<p>🏠 <a class="pill-link" href="#/houses/' + esc(h.id) + '">' + esc(h.name) + '</a></p>' : '') +
-        (f.phone ? '<p>📞 <a href="tel:' + esc(f.phone) + '">' + esc(f.phone) + '</a></p>' : '') +
-        (f.email ? '<p>✉️ <a href="mailto:' + esc(f.email) + '">' + esc(f.email) + '</a></p>' : '') + '</div></article>';
-    }).join('') + '</div>';
+    const person = (f) => '<article class="card person">' + F.avatar(f) + '<div><h3>' + esc(f.name) + '</h3>' +
+      (f.members && f.members.length ? '<p>' + esc(f.members.join(', ')) + '</p>' : '') +
+      (f.phone ? '<p>📞 <a href="tel:' + esc(f.phone) + '">' + esc(f.phone) + '</a></p>' : '') +
+      (f.email ? '<p>✉️ <a href="mailto:' + esc(f.email) + '">' + esc(f.email) + '</a></p>' : '') + '</div></article>';
+    const groups = F.houses.map((h) => [h, F.families.filter((f) => f.house === h.id)]).filter((g) => g[1].length);
+    const loose = F.families.filter((f) => !f.house || !F.house(f.house));
+    app.innerHTML = '<h1>👨‍👩‍👧 Who is Staying Where</h1><p class="sub">Grouped by house. Tap a phone number to call.</p>' +
+      groups.map((g) => '<h2>🏠 ' + esc(g[0].name) + ' <a class="pill-link" style="font-size:.9rem" href="#/houses/' + esc(g[0].id) + '">house info →</a></h2><div class="grid">' + g[1].map(person).join('') + '</div>').join('') +
+      (loose.length ? '<h2>Other</h2><div class="grid">' + loose.map(person).join('') + '</div>' : '');
   };
 
+  let mealFilter = 'all';
   P.meals = (app) => {
-    const meals = F.events.filter(F.isMeal);
+    const all = F.events.filter(F.isMeal);
+    const types = all.map((e) => e.mealType || 'meal').filter((t, i, a) => a.indexOf(t) === i);
+    const meals = all.filter((e) => mealFilter === 'all' || (e.mealType || 'meal') === mealFilter);
     const days = meals.map((e) => e.date).filter((d, i, a) => a.indexOf(d) === i);
-    app.innerHTML = '<h1>🍽️ Meals & Gatherings</h1><p class="sub">Every family meal this week at a glance.</p>' + (days.map((d) => '<div class="day">' + esc(F.longDate(d)) + '</div>' + meals.filter((e) => e.date === d).map((e) => {
+    app.innerHTML = '<h1>🍽️ Meals & Gatherings</h1><p class="sub">Every family meal this week at a glance.</p>' +
+      '<div class="chips" role="group" aria-label="Filter meals"><button class="chip" aria-pressed="' + (mealFilter === 'all') + '" data-m="all">All</button>' +
+      types.map((t) => '<button class="chip" aria-pressed="' + (mealFilter === t) + '" data-m="' + esc(t) + '">' + (F.MEAL_ICONS[t] || '🍽️') + ' ' + esc(t) + '</button>').join('') + '</div>' + (days.map((d) => '<div class="day ' + (d === F.today() ? 'today' : '') + '">' + esc(F.longDate(d)) + '</div>' + meals.filter((e) => e.date === d).map((e) => {
       const l = e.location && F.place(e.location), h = e.host && F.family(e.host);
       return '<article class="card event ' + e.status + '"><span class="badge">' + (F.MEAL_ICONS[e.mealType] || '🍽️') + ' ' + esc(e.mealType || 'meal') + '</span>' + (e.status === 'tentative' ? '<span class="badge tentative">⏳ Tentative</span>' : '') +
         '<h3>' + esc(e.title) + '</h3><div class="meta">🕒 ' + esc(e.time || 'Time TBD') + ' · 📍 ' + (l ? '<a class="pill-link" href="#/map/' + esc(l.id) + '">' + esc(l.name) + '</a>' : 'TBD') + '</div>' +
-        (h ? '<div class="meta">👤 Host: ' + esc(h.name) + '</div>' : '') + (e.description ? '<p>' + nl(e.description) + '</p>' : '') + (e.notes ? '<div class="note">📝 ' + nl(e.notes) + '</div>' : '') + '</article>';
+        (h ? '<div class="meta">👤 Host: ' + esc(h.name) + '</div>' : '') + (e.description ? '<p>' + nl(e.description) + '</p>' : '') + (e.notes ? '<div class="note">📝 ' + nl(e.notes) + '</div>' : '') +
+        '<p><button data-ics="' + esc(e.id) + '">📲 Add to my calendar</button></p></article>';
     }).join('')).join('') || '<p class="empty">No meals planned yet.</p>');
+    app.querySelectorAll('[data-m]').forEach((b) => { b.onclick = () => { mealFilter = b.dataset.m; P.meals(app); }; });
   };
 
   P.houses = (app, id) => {
     const hs = id ? F.houses.filter((h) => h.id === id) : F.houses;
-    const dd = (k, v, code) => v ? '<dt>' + k + '</dt><dd>' + (code ? '<span class="code">' + esc(v) + '</span>' : nl(v)) + '</dd>' : '';
+    const dd = (k, v, code) => v ? '<dt>' + k + '</dt><dd>' + (code ? '<span class="code">' + esc(v) + '</span> <button class="small" data-copy="' + esc(v) + '" aria-label="Copy ' + k + '">Copy</button>' : nl(v)) + '</dd>' : '';
     app.innerHTML = '<h1>🔑 House Information</h1><p class="sub">' + (id ? '<a class="pill-link" href="#/houses">← All houses</a>' : 'Please keep this information within the family.') + '</p>' +
+      (id ? '' : '<div class="chips" aria-label="Jump to a house">' + F.houses.map((h) => '<a class="chip" href="#/houses/' + esc(h.id) + '">' + esc(h.name) + '</a>').join('') + '</div>') +
       (hs.map((h) => {
         const fs = F.families.filter((f) => f.house === h.id);
         return '<article class="card"><h2 style="margin-top:0">🏠 ' + esc(h.name) + '</h2><dl class="kv">' + dd('Address', h.address) + dd('Staying here', fs.map((f) => f.name).join(', ')) +
