@@ -20,5 +20,13 @@ Fixed: `data/schedule.js` is the single source. Days own the date, events nest u
 ## Data structure recommendations
 Keep one file per content type (see README). Reference by id (host, location, event) rather than repeating text. Run `#/check` after edits. If it grows, split schedule by day.
 
-## Modified files
+## Dashboard refactor (v6)
+- Navigation is exactly seven sections (`F.NAV` in `js/util.js`): This Week, Weather, Meals, Calendar, Map, Houses & Family, Photos & Memories. Old links (`#/family`, `#/gallery`, `#/memories`) redirect.
+- Latest Updates removed (`data/updates.js`, banner, check rules).
+- Home is a dashboard: countdown, weather, next meal, next event, today's plans, meals grid. "Next" uses island time (`F.nowMinutes`, `F.nextEvent`); `?today=` previews a day.
+- Houses and family merged into one card per house; photos and memories merged, with an optional `year` for past vacations.
+- Emoji appear only in the nav and page titles; everything else uses the SVG icon set.
+- Code: one file per page group (`pages.js` calendar/map/meals, `home.js`, `houses.js`, `photos.js`, `weather.js`). `styles.css` is organized as tokens, base, nav, layout, components, wide screens; colours come only from tokens, with a single dark block (the inline head script always sets `data-theme`). Spacing and radius tokens, 48px touch targets, reduced-motion respected, houses page no longer loads Leaflet.
+
+## Modified files (earlier rounds)
 Added: `data/schedule.js`, `js/check.js`, `REVIEW.md`. Removed: `data/events.js`. Rewritten: `js/util.js`, `js/components.js`, `js/pages.js`, `js/app.js`, `styles.css`, `README.md`. Edited: `index.html`, `sw.js`, `data/config.js`, `data/updates.js`, `data/photos.js`, `data/memories.js`.

@@ -1,41 +1,28 @@
-/* Shell: navigation, updates banner and hash router. */
+/* Shell: navigation, theme and text size, and the hash router. */
 (function (F) {
   const { $, esc } = F;
-  // [address, icon, label, where]  where: 'm' = always in the phone bar, 'd' = desktop bar and the More page
-  F.NAV = [['#/', 'home', 'This Week', 'm'], ['#/meals', 'restaurant', 'Meals', 'm'], ['#/map', 'map', 'Map', 'm'], ['#/calendar', 'calendar', 'Calendar', 'm'], ['#/weather', 'sun', 'Weather', 'd'], ['#/houses', 'key', 'Houses', 'd'], ['#/family', 'users', 'Family', 'd'], ['#/gallery', 'photo', 'Photos', 'd'], ['#/memories', 'heart', 'Memories', 'd']];
+  const ALIASES = { family: 'houses', gallery: 'photos', memories: 'photos', updates: 'home', more: 'home' };
+  const TITLES = { check: 'Data Check' };
 
-  function updateLine(x) {
-    const e = x.event && F.events.find((v) => v.id === x.event);
-    if (!e) return '';
-    const l = F.whereOf(e);
-    return '<small>Now: ' + esc(F.shortDate(e.date)) + (e.time ? ', ' + esc(e.time) : '') + (l ? ' at ' + esc(l.name) : '') + '</small>';
-  }
+  const parts = () => (location.hash || '#/').replace(/^#\/?/, '').split('/');
+  const routeOf = () => { const n = parts()[0] || 'home'; return ALIASES[n] || n; };
 
-  function renderUpdates() {
-    const today = F.today();
-    const u = F.updates.filter((x) => x.show !== false && (!x.until || x.until >= today));
-    $('#updates').innerHTML = '<div class="banner" role="region" aria-label="Latest updates"><h2>Latest Updates</h2>' +
-      (u.length ? '<ul>' + u.slice(0, 4).map((x) => '<li class="' + (x.important ? 'important' : '') + '">' + (x.important ? '<span class="tag imp">Important</span> ' : '') + esc(x.text) + updateLine(x) + (x.date ? '<small>Posted ' + esc(F.shortDate(x.date)) + '</small>' : '') + '</li>').join('') + '</ul>' : '<p class="none">No changes right now. Everything is on plan.</p>') + '</div>';
-  }
-
-  const routeName = () => (location.hash || '#/').replace(/^#\/?/, '').split('/')[0];
   function renderNav() {
-    const cur = routeName();
-    $('#tabs').innerHTML = F.NAV.map((n) => '<a href="' + n[0] + '" class="' + (n[3] === 'd' ? 'desk' : '') + '"' + (cur === n[0].replace('#/', '') ? ' aria-current="page"' : '') + '>' + F.icon(n[1]) + '<span>' + n[2] + '</span></a>').join('') +
-      '<a href="#/more" class="more"' + (cur === 'more' ? ' aria-current="page"' : '') + '>' + F.icon('menu') + '<span>More</span></a>';
+    const cur = routeOf();
+    $('#tabs').innerHTML = F.NAV.map((n) => '<a href="' + (n[0] === 'home' ? '#/' : '#/' + n[0]) + '" aria-label="' + esc(n[2]) + '"' + (cur === n[0] ? ' aria-current="page"' : '') + '><span class="ni" aria-hidden="true">' + n[1] + '</span><span class="ns" aria-hidden="true">' + esc(n[3]) + '</span><span class="nf" aria-hidden="true">' + esc(n[2]) + '</span></a>').join('');
   }
 
-  const TITLES = { home: 'This Week', calendar: 'Calendar', map: 'Island Map', meals: 'Meals & Gatherings', weather: 'Weather', houses: 'House Info', family: 'Family Directory', gallery: 'Photos', memories: 'Memories', more: 'Menu', check: 'Data Check' };
   let first = true;
-
   function route() {
     F.maps.splice(0).forEach((m) => m.remove());
-    const parts = (location.hash || '#/').replace(/^#\/?/, '').split('/');
-    const name = F.pages[parts[0]] ? parts[0] : 'home';
-    F.pages[name]($('#app'), parts[1]);
-    document.title = (name === 'home' ? '' : TITLES[name] + ' · ') + F.siteName;
+    const p = parts(), name = F.pages[ALIASES[p[0]] || p[0]] ? (ALIASES[p[0]] || p[0]) : 'home';
+    const arg = p[1];
+    document.body.dataset.route = name;
+    F.pages[name]($('#app'), arg);
+    const label = F.nav(name) ? F.nav(name)[2] : TITLES[name];
+    document.title = (name === 'home' ? '' : label + ' · ') + F.siteName;
     renderNav();
-    if (!(name === 'map' && parts[1]) && !(name === 'calendar' && parts[1])) window.scrollTo(0, 0);
+    if (!arg) window.scrollTo(0, 0);
     if (!first) $('#app').focus({ preventScroll: true });
     first = false;
   }
@@ -44,7 +31,7 @@
   const big = () => document.documentElement.classList.contains('big');
   const setBig = (on) => {
     document.documentElement.classList.toggle('big', on);
-    const b = $('#textsize'); b.setAttribute('aria-pressed', on); b.textContent = on ? 'A−' : 'A+'; b.setAttribute('aria-label', on ? 'Make text smaller' : 'Make text bigger');
+    const b = $('#textsize'); b.setAttribute('aria-pressed', on); b.textContent = on ? 'A\u2212' : 'A+'; b.setAttribute('aria-label', on ? 'Make text smaller' : 'Make text bigger');
     try { localStorage.setItem('fox-big', on ? '1' : ''); } catch (e) {}
   };
   try { if (localStorage.getItem('fox-big')) setBig(true); } catch (e) {}
@@ -53,13 +40,13 @@
   // Theme: Auto follows the phone, Light and Dark are chosen by hand; remembered on this device.
   const THEMES = ['auto', 'light', 'dark'], THEME_LABEL = { auto: 'Auto', light: 'Light', dark: 'Dark' };
   const themeMeta = document.querySelector('meta[name=theme-color]');
+  const prefersDark = () => window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
   const setTheme = (t) => {
-    const root = document.documentElement;
-    if (t === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', t);
-    const b = $('#themebtn'); b.textContent = THEME_LABEL[t]; b.dataset.theme = t;
+    const dark = t === 'dark' || (t === 'auto' && prefersDark());
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    const b = $('#themebtn'); b.textContent = THEME_LABEL[t];
     b.setAttribute('aria-label', 'Color theme: ' + (t === 'auto' ? 'automatic' : t) + '. Tap to change.');
-    const dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
-    if (themeMeta) themeMeta.content = dark ? '#0a3d58' : '#0b5d8a';
+    if (themeMeta) themeMeta.content = dark ? '#06202d' : '#0b5d8a';
     try { localStorage.setItem('fox-theme', t === 'auto' ? '' : t); } catch (e) {}
   };
   let theme = 'auto';
@@ -72,7 +59,6 @@
   $('#foot-name').textContent = F.siteName;
   if (F.config.lastUpdated) $('#stamp').textContent = ' · Last updated ' + F.shortDate(F.config.lastUpdated);
 
-  renderUpdates();
   window.addEventListener('hashchange', route);
   route();
 

@@ -35,17 +35,6 @@
     return day ? '<section class="card focus"><p class="eyebrow">' + esc(label) + '</p><h3>' + esc(F.longDate(date)) + (day.title ? '<span class="wk-title">' + esc(day.title) + '</span>' : '') + '</h3>' + F.dayList(day, { detail: true }) + '</section>' : '';
   };
 
-  // The whole trip, one block per day. This is the centerpiece of the home page.
-  F.weekView = () => {
-    const today = F.today();
-    return '<div class="wk">' + F.days.map((day) => {
-      const isToday = day.date === today, id = 'wd-' + day.date;
-      return '<section class="wk-day' + (isToday ? ' today' : '') + '" aria-labelledby="' + id + '">' +
-        '<a class="wk-date" href="#/calendar/' + day.date + '" aria-label="Details for ' + esc(F.longDate(day.date)) + '"><span class="wd">' + esc(F.weekdayShort(day.date)) + '</span><span class="dn">' + F.dayNum(day.date) + '</span><span class="mo">' + esc(F.monthShort(day.date)) + '</span></a>' +
-        '<div class="wk-body"><h3 id="' + id + '" class="wk-h">' + esc(F.weekday(day.date)) + (isToday ? tag('today', 'Today') : '') + (day.title ? '<span class="wk-title">' + esc(day.title) + '</span>' : '') + '</h3>' + F.dayList(day) + '</div></section>';
-    }).join('') + '</div>';
-  };
-
   // Full card for any event. Meals get the same card, so dinners look the same everywhere.
   F.eventCard = (e, o) => {
     o = o || {};

@@ -27,7 +27,28 @@
     const m = /(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i.exec(t || '');
     return m ? (+m[1] % 12 + (/pm/i.test(m[3]) ? 12 : 0)) * 60 + +(m[2] || 0) : null;
   };
+  // Minutes since midnight on the island. With a ?today= preview the clock stays at the start of that day.
+  F.nowMinutes = () => {
+    if (/[?&]today=/.test(location.search)) return 0;
+    try {
+      const p = new Intl.DateTimeFormat('en-US', { timeZone: F.config.timezone, hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date());
+      return +p.find((x) => x.type === 'hour').value * 60 + +p.find((x) => x.type === 'minute').value;
+    } catch (e) { const n = new Date(); return n.getHours() * 60 + n.getMinutes(); }
+  };
+  // The first event that has not started yet (an hour of grace), optionally limited by a test such as F.isMeal.
+  F.nextEvent = (test) => {
+    const today = F.today(), now = F.nowMinutes() - 60;
+    return F.events.find((e) => (!test || test(e)) && (e.date > today || (e.date === today && (F.minutes(e.time) == null || F.minutes(e.time) >= now)))) || null;
+  };
   F.siteName = F.config.title + ' ' + F.config.year;
+
+  // The seven sections of the site: [route, emoji, label, short label for the phone bar]. Emoji appear only here and in page titles.
+  F.NAV = [
+    ['home', '\u{1F3D6}\uFE0F', 'This Week', 'Week'], ['weather', '\u{1F324}\uFE0F', 'Weather', 'Weather'], ['meals', '\u{1F37D}\uFE0F', 'Meals', 'Meals'], ['calendar', '\u{1F4C5}', 'Calendar', 'Calendar'],
+    ['map', '\u{1F5FA}\uFE0F', 'Map', 'Map'], ['houses', '\u{1F3E0}', 'Houses & Family', 'Houses'], ['photos', '\u{1F4F8}', 'Photos & Memories', 'Photos']
+  ];
+  F.nav = (route) => F.NAV.find((n) => n[0] === route);
+  F.pageTitle = (route) => { const n = F.nav(route); return n ? n[1] + ' ' + F.esc(n[2]) : ''; };
 
   F.CATEGORIES = { plan: 'Plan', meal: 'Family Meal', excursion: 'Excursion', beach: 'Beach Activity', arrival: 'Arrival Day', departure: 'Departure Day' };
   F.PLACE_TYPES = { house: ['house', 'Family Houses'], restaurant: ['restaurant', 'Restaurants'], grocery: ['grocery', 'Groceries'], beach: ['beach', 'Beach Access'], activity: ['activity', 'Activities'], gathering: ['gathering', 'Meal Spots'] };

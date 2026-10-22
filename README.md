@@ -11,12 +11,10 @@ A static, mobile-first vacation hub. No Node, no build, no database. Open `index
 | To change... | Edit |
 |---|---|
 | Events, meals, dinners, trip dates | `data/schedule.js` (the only place dates live) |
-| Latest Updates banner | `data/updates.js` |
-| Houses (address, Wi-Fi, codes, lat/lng) | `data/houses.js` |
+| Houses and who stays there | `data/houses.js` + `data/families.js` (shown together on Houses & Family) |
 | Restaurants, stores, beaches, activities on the map | `data/locations.js` |
-| Families and who stays where | `data/families.js` |
-| Photos and albums | `data/photos.js` + files in `images/` |
-| Memories | `data/memories.js` |
+| Photos and albums (optional `year` for past trips) | `data/photos.js` + files in `images/` |
+| Memories (optional `year` for past trips) | `data/memories.js` |
 | Title, year, welcome text, weather, timezone | `data/config.js` |
 
 After editing, commit and push; Pages updates in 1-2 minutes. Bump `VERSION` in `sw.js` if phones keep showing old content.
@@ -42,8 +40,8 @@ This repo is public. Do not commit real door, gate or Wi-Fi codes unless you acc
 
 ```
 index.html  styles.css  sw.js  manifest.webmanifest
-data/   config, updates, houses, locations, families, schedule, photos, memories
-js/     util (dates, icons, helpers), components, check, pages, app (router/nav)
+data/   config, houses, locations, families, schedule, photos, memories
+js/     util (dates, nav, icons), components, weather, check, pages (calendar/map/meals), home, houses, photos, app (router/nav)
 images/
 ```
 

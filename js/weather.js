@@ -69,13 +69,13 @@
       '<div class="hi">' + deg(d.daily.temperature_2m_max[i]) + '<small>' + deg(d.daily.temperature_2m_min[i]) + '</small></div></li>';
   };
 
-  // Home page card: now, plus the next few days.
-  F.weather = (el) => {
+  // Dashboard tile: conditions right now plus today's high, low and rain chance. Opens the Weather page.
+  F.weatherNow = (el) => {
     forecast().then((r) => {
       const d = r.data, c = d.current;
-      const days = d.daily.time.slice(0, 4).map((t, i) => '<li><b>' + (i === 0 ? 'Today' : esc(F.weekdayShort(t))) + '</b>' + deg(d.daily.temperature_2m_max[i]) + ' / ' + deg(d.daily.temperature_2m_min[i]) + '<small>' + d.daily.precipitation_probability_max[i] + '% rain</small></li>').join('');
-      el.innerHTML = stale(r) + '<div class="weather"><div class="t">' + deg(c.temperature_2m) + 'F</div><div><div><b>' + kind(c.weather_code) + '</b></div><div class="meta">Feels like ' + deg(c.apparent_temperature) + ' · Wind ' + Math.round(c.wind_speed_10m) + ' mph</div></div></div><ul class="wx-days">' + days + '</ul>';
-    }).catch(() => failed(el, () => F.weather(el)));
+      el.innerHTML = stale(r) + '<div class="weather">' + ico(c.weather_code) + '<div class="t">' + deg(c.temperature_2m) + '</div><div><b>' + kind(c.weather_code) + '</b><div class="meta">Feels like ' + deg(c.apparent_temperature) + ' &middot; Wind ' + Math.round(c.wind_speed_10m) + ' mph</div></div></div>' +
+        '<p class="line">Today ' + deg(d.daily.temperature_2m_max[0]) + ' / ' + deg(d.daily.temperature_2m_min[0]) + ' &middot; ' + d.daily.precipitation_probability_max[0] + '% rain</p>';
+    }).catch(() => failed(el, () => F.weatherNow(el)));
   };
 
   // A heads-up when a trip day looks stormy, windy or very wet.
@@ -93,7 +93,7 @@
   };
 
   (F.pages = F.pages || {}).weather = (app) => {
-    app.innerHTML = '<h1>Weather</h1><p class="sub">Dauphin Island, live from the Open-Meteo weather service.</p><div id="wx-body"><p class="loading">Checking the sky…</p></div>';
+    app.innerHTML = '<h1>' + F.pageTitle('weather') + '</h1><p class="sub">Dauphin Island, live from the Open-Meteo weather service.</p><div id="wx-body"><p class="loading">Checking the sky…</p></div>';
     const body = $('#wx-body');
     const load = () => forecast().then((r) => {
       const d = r.data, c = d.current, trip = F.days.map((x) => x.date);

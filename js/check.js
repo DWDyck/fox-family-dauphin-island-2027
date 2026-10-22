@@ -46,19 +46,18 @@
     if (iso(d.date) && d.dinner !== false && !d.dinner && !F.dinnerOn(d.date)) add('info', nice(d.date), 'No dinner planned yet (the site shows "Not planned yet"). Add a dinner, or set dinner: false / dinner: \'text\' on this day.');
   });
 
-  // Updates, photos, memories
-  F.updates.forEach((u, i) => {
-    const w = 'Update ' + (i + 1);
-    if (u.date && !iso(u.date)) add('error', w, 'Posted date "' + u.date + '" is invalid.');
-    if (u.until && !iso(u.until)) add('error', w, '"until" date "' + u.until + '" is invalid.');
-    if (u.event && !F.events.some((e) => e.id === u.event)) add('error', w, 'event "' + u.event + '" does not match any event id in schedule.js.');
-  });
+  // Photos and memories
   const inTrip = (s) => F.days.some((d) => d.date === s);
+  const thisYear = (x) => !x.year || x.year === F.config.year;
   F.photos.forEach((p, i) => {
     if (F.albums.indexOf(p.album) < 0) add('error', 'Photo ' + (i + 1), 'album "' + p.album + '" is not in the albums list in photos.js.');
-    if (p.date && !inTrip(p.date)) add('warn', 'Photo ' + (i + 1), 'date "' + p.date + '" is not a day of the trip.');
+    if (p.year && (!Number.isInteger(p.year) || p.year > F.config.year)) add('error', 'Photo ' + (i + 1), 'year "' + p.year + '" must be a whole year, not after ' + F.config.year + '.');
+    if (p.date && thisYear(p) && !inTrip(p.date)) add('warn', 'Photo ' + (i + 1), 'date "' + p.date + '" is not a day of the trip.');
   });
-  F.memories.forEach((m, i) => { if (m.date && !inTrip(m.date)) add('warn', 'Memory ' + (i + 1), 'date "' + m.date + '" is not a day of the trip.'); });
+  F.memories.forEach((m, i) => {
+    if (m.year && (!Number.isInteger(m.year) || m.year > F.config.year)) add('error', 'Memory ' + (i + 1), 'year "' + m.year + '" must be a whole year, not after ' + F.config.year + '.');
+    if (m.date && thisYear(m) && !inTrip(m.date)) add('warn', 'Memory ' + (i + 1), 'date "' + m.date + '" is not a day of the trip.');
+  });
   if (F.config.lastUpdated && !iso(F.config.lastUpdated)) add('error', 'config.js', 'lastUpdated must be YYYY-MM-DD (it is "' + F.config.lastUpdated + '").');
 
   // Houses, families, places

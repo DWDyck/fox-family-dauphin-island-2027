@@ -21,7 +21,7 @@
      mealType:    meals only: breakfast | lunch | dinner | seafood boil | cookout | celebration | gathering
                   (a meal at 3 PM or later counts as a dinner on the home page)
      description, notes: optional text
-     id:          optional short name. Only needed if a Latest Update should point at this event. */
+     id:          optional short name for the event. */
 FOX.schedule = [
   {
     date: '2027-06-19', title: 'Arrival Day',

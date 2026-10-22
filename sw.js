@@ -1,8 +1,8 @@
 /* Keeps the site available with spotty signal: network first, cached copy as backup.
    Bump VERSION if you ever need to force everyone to refresh. */
-const VERSION = 'fox-2027-v5';
-const CORE = ['./', 'index.html', 'styles.css', 'js/util.js', 'js/components.js', 'js/weather.js', 'js/check.js', 'js/pages.js', 'js/app.js',
-  'data/config.js', 'data/updates.js', 'data/houses.js', 'data/locations.js', 'data/families.js', 'data/schedule.js', 'data/photos.js', 'data/memories.js'];
+const VERSION = 'fox-2027-v6';
+const CORE = ['./', 'index.html', 'styles.css', 'js/util.js', 'js/components.js', 'js/weather.js', 'js/check.js', 'js/pages.js', 'js/home.js', 'js/houses.js', 'js/photos.js', 'js/app.js',
+  'data/config.js', 'data/houses.js', 'data/locations.js', 'data/families.js', 'data/schedule.js', 'data/photos.js', 'data/memories.js'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()));
