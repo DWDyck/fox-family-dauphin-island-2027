@@ -32,6 +32,7 @@
       '<div class="hero"><h1>' + esc(cfg.welcome) + '</h1><p class="hero-date">' + esc(F.fullDate(real)) + '</p>' +
       '<p class="hero-trip"><b>' + esc(status) + '</b><span>' + esc(F.shortDate(t.start)) + ' to ' + esc(F.shortDate(t.end)) + ', ' + cfg.year + '</span></p></div>' +
       (after ? '<p><a class="btn primary" href="#/memories">See our memories</a></p>' : '') +
+      '<h2 class="first" id="glance">Meals &amp; gatherings at a glance</h2><p class="sub">Tap any meal for details. Dashed edge = not confirmed yet.</p>' + F.mealBoard() +
       (dinner ? F.eventCard(dinner, { feature: true, showDate: dinner.date !== real, eyebrow: dinnerLabel }) + '<p class="more"><a class="pill-link" href="#/meals">All meals and gatherings</a></p>' : '') +
       (!after ? '<div class="two">' + F.focusCard(focus, lead[0]) + F.focusCard(F.addDays(focus, 1), lead[1]) + '</div>' : '') +
       '<h2 id="week">The week</h2><p class="sub">Tap a date for details. A dashed edge means the plan is not confirmed yet.</p>' + F.weekView() +

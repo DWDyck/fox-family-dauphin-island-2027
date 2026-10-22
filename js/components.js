@@ -126,4 +126,28 @@
     });
   };
 
+  // Meals & gatherings at a glance: one row per day, columns for breakfast, lunch and dinner.
+  const slotOf = (e) => {
+    if (e.mealType === 'breakfast') return 0;
+    if (e.mealType === 'lunch') return 1;
+    const m = F.minutes(e.time);
+    return m == null || m >= 15 * 60 ? 2 : m < 11 * 60 ? 0 : 1;
+  };
+  F.mealBoard = () => {
+    const today = F.today(), names = ['Breakfast', 'Lunch', 'Dinner'];
+    const cell = (d, s) => {
+      const evs = d.events.filter((e) => F.isMeal(e) && slotOf(e) === s).sort((a, b) => (F.minutes(a.time) || 0) - (F.minutes(b.time) || 0));
+      if (!evs.length) {
+        const note = s === 2 && d.dinner !== undefined ? (d.dinner === false ? 'No dinner' : d.dinner) : '';
+        return '<td class="mb-empty' + (note ? ' mb-note' : '') + '" data-label="' + names[s] + '">' + (note ? esc(note) : '<span aria-label="Nothing planned">&ndash;</span>') + '</td>';
+      }
+      return '<td class="mb-cell' + (s === 2 ? ' mb-din' : '') + '" data-label="' + names[s] + '">' + evs.map((e) => {
+        const h = F.hostOf(e), l = F.whereOf(e);
+        return '<a class="mb-meal' + (e.status === 'tentative' ? ' tentative' : '') + '" href="#/calendar/' + d.date + '"><b>' + esc(e.title) + '</b><small>' + esc(e.time || '') + (e.status === 'tentative' ? ' · Tentative' : '') + '</small>' + (h || l ? '<small>' + esc(h ? h.name : l.name) + '</small>' : '') + '</a>';
+      }).join('') + '</td>';
+    };
+    return '<div class="mealboard"><table class="mb"><caption class="sr">Meals and gatherings for each day of the trip</caption><thead><tr><th scope="col">Day</th>' + names.map((n) => '<th scope="col">' + n + '</th>').join('') + '</tr></thead><tbody>' +
+      F.days.map((d) => '<tr' + (d.date === today ? ' class="now"' : '') + '><th scope="row"><a href="#/calendar/' + d.date + '"><span class="wd">' + esc(F.weekdayShort(d.date)) + '</span><span class="dn">' + F.dayNum(d.date) + '</span><span class="mo">' + esc(F.monthShort(d.date)) + '</span></a>' + (d.title ? '<small>' + esc(d.title) + '</small>' : '') + '</th>' + [0, 1, 2].map((s) => cell(d, s)).join('') + '</tr>').join('') +
+      '</tbody></table></div>';
+  };
 })(window.FOX);

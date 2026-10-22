@@ -156,6 +156,35 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .quick .ic{width:1.8rem;height:1.8rem}
 .quick a:active{transform:scale(.97)}
 
+/* Meals at a glance */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mealboard{margin:0 -4px 14px}
+.mb{width:100%;border-collapse:separate;border-spacing:4px;table-layout:fixed;font-size:.8rem}
+.mb thead th{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--drift);text-align:left;padding:0 6px 2px}
+.mb thead th:first-child{width:3.4rem}
+.mb tbody th{vertical-align:top;background:var(--seaglass);border-radius:10px;padding:6px 2px;text-align:center;color:var(--ocean-d);font-weight:800}
+.mb tbody th a{display:flex;flex-direction:column;align-items:center;line-height:1.05;text-decoration:none;color:inherit}
+.mb .wd{font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.mb .dn{font-size:1.4rem}
+.mb .mo{font-size:.65rem;text-transform:uppercase}
+.mb tbody th small{display:block;font-size:.6rem;font-weight:700;color:var(--drift);margin-top:3px;line-height:1.1}
+.mb tr.now th{background:var(--ocean);color:var(--on-ocean)}
+.mb tr.now th small{color:inherit}
+.mb td{vertical-align:top;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0;overflow:hidden;hyphens:auto}
+.mb tr.now td{border:2px solid var(--ocean)}
+.mb td.mb-din{background:var(--seaglass-l)}
+.mb-meal{display:block;padding:6px;text-decoration:none;color:var(--ink);line-height:1.2;min-height:48px}
+.mb-meal+.mb-meal{border-top:1px solid var(--line)}
+.mb-meal b{display:block;font-size:.85rem}
+.mb-meal small{display:block;color:var(--drift);font-size:.68rem;margin-top:1px}
+.mb-meal.tentative{border-left:4px dashed var(--warn)}
+.mb-empty{text-align:center;color:var(--drift);padding:8px 4px!important;vertical-align:middle!important;background:transparent!important;border-style:dashed!important}
+.mb-note{font-size:.7rem;font-style:italic}
+@media(min-width:720px){
+  .mb{font-size:.95rem;border-spacing:6px}.mb thead th:first-child{width:5rem}
+  .mb .dn{font-size:1.8rem}.mb-meal b{font-size:1rem}.mb-meal small{font-size:.8rem}.mb thead th{font-size:.8rem}.mb-note{font-size:.85rem}
+}
+
 /* Weather */
 .weather{display:flex;align-items:center;gap:14px}
 .weather .t{font-size:2.2rem;font-weight:800;color:var(--ocean-d)}
@@ -260,7 +289,7 @@ dialog form{margin:0;display:contents}
   body{padding-bottom:0;display:flex;flex-direction:column}
   .top{order:-3}#updates{order:-2;width:100%}main{width:100%}
   .tabs{position:static;order:-1;width:100%;max-width:960px;margin:0 auto;border:0;background:transparent;gap:8px;padding:8px 12px;flex-wrap:wrap}
-  .tabs a,.tabs a.desk{flex-direction:row;gap:8px;min-height:52px;background:var(--surface);border-radius:99px;font-size:.95rem}
+  .tabs a,.tabs a.desk{flex:0 0 auto;white-space:nowrap;padding:8px 16px;flex-direction:row;gap:8px;min-height:52px;background:var(--surface);border-radius:99px;font-size:.95rem}
   .tabs a.desk{display:flex}
   .tabs a.more{display:none}
   .tabs a[aria-current=page]{box-shadow:inset 0 0 0 3px var(--ocean)}
