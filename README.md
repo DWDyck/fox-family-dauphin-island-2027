@@ -1,6 +1,6 @@
 # Fox Family Dauphin Island 2027
 
-**Live site: [dwdike-maker.github.io/fox-family-dauphin-island-2027](https://dwdike-maker.github.io/fox-family-dauphin-island-2027/)**
+**Live site: [dwdyck.github.io/fox-family-dauphin-island-2027](https://dwdyck.github.io/fox-family-dauphin-island-2027/)**
 
 A mobile-first family vacation dashboard: the week's meals and plans in one table, live weather, houses and who is staying where, a map, and photos and memories. Installable, works offline after the first visit, with light, dark and auto themes. Plain HTML, CSS and JavaScript: no build, no database. Built as an experiment in using AI to make a genuinely useful family tool.
 
