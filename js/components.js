@@ -135,7 +135,7 @@
         return '<a class="mb-meal' + (e.status === 'tentative' ? ' tentative' : '') + '" href="#/calendar/' + d.date + '"><b>' + esc(e.title) + '</b><small>' + esc(e.time || '') + (e.status === 'tentative' ? ' · Tentative' : '') + '</small>' + (h || l ? '<small>' + esc(h ? h.name : l.name) + '</small>' : '') + '</a>';
       }).join('') + '</td>';
     };
-    return '<div class="mealboard"><table class="mb"><caption class="sr">Meals and gatherings for each day of the trip</caption><thead><tr><th scope="col">Day</th>' + names.map((n) => '<th scope="col">' + n + '</th>').join('') + '</tr></thead><tbody>' +
+    return '<div class="mealboard" tabindex="0" role="region" aria-label="Meals and events by day, scrolls sideways"><table class="mb"><caption class="sr">Meals and gatherings for each day of the trip</caption><thead><tr><th scope="col">Day</th>' + names.map((n) => '<th scope="col">' + n + '</th>').join('') + '</tr></thead><tbody>' +
       F.days.map((d) => '<tr' + (d.date === today ? ' class="now"' : '') + '><th scope="row"><a href="#/calendar/' + d.date + '"><span class="wd">' + esc(F.weekdayShort(d.date)) + '</span><span class="dn">' + F.dayNum(d.date) + '</span><span class="mo">' + esc(F.monthShort(d.date)) + '</span></a>' + (d.title ? '<small>' + esc(d.title) + '</small>' : '') + '</th>' + [0, 1, 2].map((s) => cell(d, s)).join('') + '</tr>').join('') +
       '</tbody></table></div>';
   };
