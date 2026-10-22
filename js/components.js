@@ -126,13 +126,4 @@
     });
   };
 
-  const WX = { 0: 'Clear', 1: 'Mostly clear', 2: 'Partly cloudy', 3: 'Cloudy', 45: 'Fog', 48: 'Fog', 51: 'Drizzle', 53: 'Drizzle', 55: 'Drizzle', 61: 'Rain', 63: 'Rain', 65: 'Heavy rain', 80: 'Showers', 81: 'Showers', 82: 'Heavy showers', 95: 'Thunderstorms', 96: 'Thunderstorms', 99: 'Thunderstorms' };
-  F.weather = (el) => {
-    const w = F.config.weather;
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + w.lat + '&longitude=' + w.lng + '&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=' + encodeURIComponent(F.config.timezone) + '&forecast_days=4')
-      .then((r) => r.json()).then((d) => {
-        const days = d.daily.time.map((t, i) => '<li><b>' + (i === 0 ? 'Today' : esc(F.weekdayShort(t))) + '</b>' + Math.round(d.daily.temperature_2m_max[i]) + '° / ' + Math.round(d.daily.temperature_2m_min[i]) + '°<small>' + d.daily.precipitation_probability_max[i] + '% rain</small></li>').join('');
-        el.innerHTML = '<div class="weather"><div class="t">' + Math.round(d.current.temperature_2m) + '°F</div><div><div><b>' + (WX[d.current.weather_code] || 'Weather') + '</b></div><div class="meta">Wind ' + Math.round(d.current.wind_speed_10m) + ' mph</div></div></div><ul class="wx-days">' + days + '</ul>';
-      }).catch(() => { el.innerHTML = '<p class="empty">Weather is unavailable right now.</p>'; });
-  };
 })(window.FOX);

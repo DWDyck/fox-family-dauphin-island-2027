@@ -14,7 +14,7 @@
     const evs = F.events.filter((e) => e.location === l.id);
     return '<div class="pop"><p class="pop-type">' + esc(SINGLE[l.type]) + '</p><h3>' + esc(l.name) + '</h3>' + (l.address ? '<p>' + esc(l.address) + '</p>' : '') + (l.description ? '<p>' + esc(l.description) + '</p>' : '') +
       (evs.length ? '<p class="pop-h">Related events</p><ul>' + evs.map((e) => '<li><b>' + esc(F.shortDate(e.date)) + '</b>' + (e.time ? ', ' + esc(e.time) : '') + ' – ' + esc(e.title) + (e.status === 'tentative' ? ' (tentative)' : '') + '</li>').join('') + '</ul>' : '') +
-      '<a class="btn small" href="' + F.mapsLink(l.address || l.name) + '" target="_blank" rel="noopener">Get directions</a></div>';
+      '<a class="btn small primary" href="' + F.mapsLink(l.address || l.name) + '" target="_blank" rel="noopener">Get directions</a></div>';
   };
 
   P.home = (app) => {
@@ -37,7 +37,7 @@
       '<h2 id="week">The week</h2><p class="sub">Tap a date for details. A dashed edge means the plan is not confirmed yet.</p>' + F.weekView() +
       '<p><a class="btn primary" href="#/calendar">Detailed calendar</a></p>' +
       (tent.length ? '<h2>Still to be confirmed</h2><ul class="plainlist">' + tent.map((e) => '<li><a href="#/calendar/' + e.date + '"><b>' + esc(F.shortDate(e.date)) + (e.time ? ', ' + esc(e.time) : '') + '</b> ' + esc(e.title) + '</a></li>').join('') + '</ul>' : '') +
-      '<h2>Dauphin Island weather</h2><div class="card" id="wx"><p class="loading">Checking the sky…</p></div>' +
+      '<h2>Dauphin Island weather</h2><div class="card" id="wx"><p class="loading">Checking the sky…</p></div><p class="more"><a class="pill-link" href="#/weather">Full forecast and trip-week outlook</a></p>' +
       '<div class="quick">' + links.map((n) => '<a href="' + n[0] + '">' + F.icon(n[1]) + n[2] + '</a>').join('') + '</div>' +
       (feat ? '<h2>Featured photo</h2><img class="featured" src="' + esc(feat.src) + '" alt="' + esc(feat.caption || 'Featured family photo') + '">' + (feat.caption ? '<p class="cap">' + esc(feat.caption) + '</p>' : '') : '');
     F.weather($('#wx'));

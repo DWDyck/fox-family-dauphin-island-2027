@@ -46,3 +46,8 @@ data/   config, updates, houses, locations, families, schedule, photos, memories
 js/     util (dates, icons, helpers), components, check, pages, app (router/nav)
 images/
 ```
+
+## Dark/light mode and weather
+- The header button cycles Auto / Light / Dark (remembered per device).
+- The Weather page (#/weather) uses the free Open-Meteo API (no key): current, 24-hour, 7-day, and our-week outlook. Dates beyond the 16-day forecast show typical weather from past years. Coordinates are in data/config.js.
+
