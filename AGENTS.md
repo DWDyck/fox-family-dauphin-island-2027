@@ -3,7 +3,7 @@
 Context for AI agents working on the Fox Family Dauphin Island 2027 vacation site. Read this before editing.
 
 ## What this is
-A static, mobile-first family vacation dashboard on GitHub Pages. Vanilla JS and CSS: **no build step, no npm, no server, no framework**. Repo `dwdike-maker/fox-family-dauphin-island-2027`, live at https://dwdike-maker.github.io/fox-family-dauphin-island-2027/. Users are non-technical family members on phones; simplicity and quick scanning beat features.
+A static, mobile-first family vacation dashboard on GitHub Pages. Vanilla JS and CSS: **no build step, no npm, no server, no framework**. Repo `DWDyck/fox-family-dauphin-island-2027`, live at https://dwdyck.github.io/fox-family-dauphin-island-2027/. Users are non-technical family members on phones; simplicity and quick scanning beat features.
 
 ## Navigation (exactly five tabs; do not add more)
 `F.NAV` in `js/util.js`: 🏖️ This Week (`home`), 🗺️ Map, 🌤️ Weather, 🏠 Houses & Family (`houses`), 📸 Photos & Memories (`photos`). The Calendar page (`#/calendar/<date>`) is not a tab; the weekly table links to it (`F.EXTRA_PAGES`). `#/meals` redirects home. Hash router: `#/route/arg`. Old `#/family`, `#/gallery`, `#/memories` redirect via `ALIASES` in `app.js`. `#/check` is a hidden data-validation page linked from the footer. Emoji appear only in nav and page titles; elsewhere use the SVG icon set (`F.icon`).
@@ -62,7 +62,7 @@ No tooling required.
 4. Open `#/check` and confirm no errors.
 
 ## Deploy
-Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R dwdike-maker/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v12`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
+Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R DWDyck/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v12`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
 
 ## External services
 Open-Meteo (weather, no key), OpenStreetMap tiles and Leaflet from unpkg (map, loaded lazily), Nominatim (geocoding addresses lacking lat/lng, cached). All degrade gracefully offline.
