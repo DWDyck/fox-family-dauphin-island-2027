@@ -43,7 +43,7 @@ Script load order matters (data, util, components, weather, check, pages, home, 
 - Edit emoji with `\u{...}` escapes in JS; PowerShell mangles emoji in files.
 
 ## Admin editor (admin.html)
-Self-contained page that loads the data files, edits an in-memory copy, and regenerates `data/*.js` (comments are regenerated from headers in the page). If you change a data field or schema, update `FIELDS`, `HDR` and `validate()` in `admin.html` too. No contact fields (phone/email) or door/Wi-Fi codes exist on purpose. Test by serving the folder and opening `admin.html`; `window.FOXADMIN` exposes `texts()` and `validate()`.
+Self-contained page that loads the data files, edits an in-memory copy, and regenerates `data/*.js` (comments are regenerated from headers in the page). If you change a data field or schema, update `FIELDS`, `HDR` and `validate()` in `admin.html` too. No contact fields (phone/email) or door/Wi-Fi codes exist on purpose. Test by serving the folder and opening `admin.html`; Save requires a connected project folder in Chrome/Edge (it prompts to connect; it never silently downloads). Downloads are only a fallback for browsers without the folder API. `window.FOXADMIN` exposes `texts()` and `validate()`.
 
 ## Develop and test
 No tooling required.

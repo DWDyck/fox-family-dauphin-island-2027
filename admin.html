@@ -483,6 +483,10 @@
     const problems = validate();
     const errs = problems.filter((p) => p[0] === 'error');
     if (errs.length) { showResult('bad', 'Fix these before saving:', errs.map((p) => p[1])); return; }
+    if (!dirHandle && window.showDirectoryPicker) {
+      await connect();
+      if (!dirHandle) { showResult('bad', 'Not saved. No project folder is connected.', ['Click Save again and choose the folder that contains index.html. Nothing is downloaded, so your project is unchanged.']); return; }
+    }
     const probe = texts(); const changed = Object.keys(probe).filter((k) => probe[k] !== original[k]);
     if (!changed.length && !pending.size) { showResult('ok', 'Nothing to save: no changes.'); return; }
     const files = texts(changed.length ? ymd(new Date()) : undefined);
@@ -492,7 +496,8 @@
       if (dirHandle) {
         if ((await dirHandle.requestPermission({ mode: 'readwrite' })) !== 'granted') throw new Error('Permission to write to the folder was not granted.');
         for (const k of toWrite) await writeFile(dirHandle, k, files[k]);
-        for (const p of pending.keys()) await writeFile(dirHandle, p, pending.get(p));
+        const pushed = [...pending.keys()];
+        for (const p of pushed) await writeFile(dirHandle, p, pending.get(p));
         try {
           const sw = await (await dirHandle.getFileHandle('sw.js')).getFile(), t = await sw.text();
           const nt = t.replace(/(fox-\d{4}-v)(\d+)/, (m, a, b) => a + (+b + 1));
@@ -500,7 +505,8 @@
         } catch (e) { notes.push('Could not bump sw.js (phones may need a hard refresh).'); }
         if (changed.length) D.config.lastUpdated = ymd(new Date()); toWrite.forEach((k) => { original[k] = files[k]; });
         pending.forEach((b, p) => { /* now saved; keep preview URL */ }); const n = pending.size; pending.clear();
-        showResult('ok', 'Saved to your project folder: ' + toWrite.length + ' data file(s)' + (n ? ' and ' + n + ' image(s)' : '') + '.', notes, true);
+        const wrote = toWrite.concat(pushed).map((p) => dirHandle.name + '/' + p);
+        showResult('ok', 'Saved ' + toWrite.length + ' data file(s)' + (n ? ' and ' + n + ' image(s)' : '') + ' into your project folder "' + dirHandle.name + '". Not live yet: publish below.', wrote.concat(notes), true);
       } else {
         if (changed.length) D.config.lastUpdated = ymd(new Date());
         toWrite.forEach((k) => download(k, new Blob([files[k]], { type: 'text/javascript' })));
@@ -535,6 +541,14 @@
       try { await kv('readwrite', (s) => s.put(d, 'dir')); } catch (e) {}
       $('#connect').textContent = 'Folder: ' + d.name;
     } catch (e) { if (e.name !== 'AbortError') alert('That folder does not look like the Fox Family site (it needs index.html and a data folder).'); }
+    folderBar();
+  }
+  function folderBar() {
+    const bar = $('#folderbar'); if (!bar) return;
+    bar.className = 'note ' + (dirHandle ? 'ok' : 'bad'); bar.textContent = '';
+    if (dirHandle) bar.append(h('b', null, 'Connected: ' + dirHandle.name), ' \u2014 Save writes straight into this folder.');
+    else if (window.showDirectoryPicker) bar.append(h('b', null, 'Not connected to your project folder. '), 'Click "Connect project folder" (or just Save) and choose the folder that contains index.html. Until then nothing can be saved.');
+    else bar.append(h('b', null, 'This browser cannot write to folders. '), 'Open this page in Chrome or Edge. Save will download files instead, and you must copy them into the project by hand.');
   }
   $('#connect').onclick = connect;
   $('#save').onclick = save;
@@ -551,7 +565,7 @@
   function render() {
     const nav = $('#tabs'); nav.textContent = '';
     TABS.forEach((t) => nav.append(h('button', { type: 'button', 'aria-current': String(t[0] === tab), onclick: () => { tab = t[0]; render(); } }, t[1])));
-    const main = $('#main'); main.textContent = ''; const body = h('div'); main.append(help(), body);
+    const main = $('#main'); main.textContent = ''; const body = h('div'); main.append(h('div', { id: 'folderbar', role: 'status' }), help(), body); folderBar();
     if (tab === 'schedule') schedule(body);
     else if (tab === 'settings') { const p = h('div', { class: 'panel' }, h('h2', null, 'Site settings')); const fh = h('div', { class: 'grid2' }); p.append(fh); renderFields(fh, D.config, FIELDS.config.filter((f) => f.k !== 'lastUpdated'), { change: touch, rerender: () => {} }); body.append(p); }
     else collection(body, specs[tab]);
