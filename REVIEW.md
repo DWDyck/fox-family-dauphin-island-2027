@@ -30,3 +30,6 @@ Keep one file per content type (see README). Reference by id (host, location, ev
 
 ## Modified files (earlier rounds)
 Added: `data/schedule.js`, `js/check.js`, `REVIEW.md`. Removed: `data/events.js`. Rewritten: `js/util.js`, `js/components.js`, `js/pages.js`, `js/app.js`, `styles.css`, `README.md`. Edited: `index.html`, `sw.js`, `data/config.js`, `data/updates.js`, `data/photos.js`, `data/memories.js`.
+
+## Update (v8)
+Home is now only the title card and the weekly table. Tabs: This Week, Map, Weather, Houses & Family, Photos & Memories. Meals tab removed (`#/meals` redirects home); Calendar remains as a linked, non-tab page.

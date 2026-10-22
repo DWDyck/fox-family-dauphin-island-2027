@@ -44,10 +44,12 @@
 
   // The seven sections of the site: [route, emoji, label, short label for the phone bar]. Emoji appear only here and in page titles.
   F.NAV = [
-    ['home', '\u{1F3D6}\uFE0F', 'This Week', 'Week'], ['weather', '\u{1F324}\uFE0F', 'Weather', 'Weather'], ['meals', '\u{1F37D}\uFE0F', 'Meals', 'Meals'], ['calendar', '\u{1F4C5}', 'Calendar', 'Calendar'],
-    ['map', '\u{1F5FA}\uFE0F', 'Map', 'Map'], ['houses', '\u{1F3E0}', 'Houses & Family', 'Houses'], ['photos', '\u{1F4F8}', 'Photos & Memories', 'Photos']
+    ['home', '\u{1F3D6}\uFE0F', 'This Week', 'Week'], ['map', '\u{1F5FA}\uFE0F', 'Map', 'Map'], ['weather', '\u{1F324}\uFE0F', 'Weather', 'Weather'],
+    ['houses', '\u{1F3E0}', 'Houses & Family', 'Houses'], ['photos', '\u{1F4F8}', 'Photos & Memories', 'Photos']
   ];
-  F.nav = (route) => F.NAV.find((n) => n[0] === route);
+  // Reachable pages that are not tabs (opened from the weekly table).
+  F.EXTRA_PAGES = [['calendar', '\u{1F4C5}', 'Calendar']];
+  F.nav = (route) => F.NAV.concat(F.EXTRA_PAGES).find((n) => n[0] === route);
   F.pageTitle = (route) => { const n = F.nav(route); return n ? n[1] + ' ' + F.esc(n[2]) : ''; };
 
   F.CATEGORIES = { plan: 'Plan', meal: 'Family Meal', excursion: 'Excursion', beach: 'Beach Activity', arrival: 'Arrival Day', departure: 'Departure Day' };

@@ -9,14 +9,14 @@
   const chip = (attr, val, on, label) => '<button type="button" class="chip" aria-pressed="' + on + '" ' + attr + '="' + esc(val) + '">' + label + '</button>';
   const SINGLE = { house: 'Family house', restaurant: 'Restaurant', grocery: 'Grocery store', beach: 'Beach access', activity: 'Activity', gathering: 'Meal spot' };
 
-  const tileLayer = () => L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' });
+  const tileLayer = () => L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Â© OpenStreetMap contributors' });
   const pin = (type, big) => L.divIcon({ className: '', html: '<div class="pin ' + (big ? 'house' : '') + ' t-' + type + '">' + F.icon(F.PLACE_TYPES[type][0]) + '</div>', iconSize: big ? [46, 46] : [34, 34], iconAnchor: big ? [23, 23] : [17, 17] });
   F.ui = { plural: plural, chip: chip, tileLayer: tileLayer, pin: pin };
 
   const popup = (l) => {
     const evs = F.events.filter((e) => e.location === l.id);
     return '<div class="pop"><p class="pop-type">' + esc(SINGLE[l.type]) + '</p><h3>' + esc(l.name) + '</h3>' + (l.address ? '<p>' + esc(l.address) + '</p>' : '') + (l.description ? '<p>' + esc(l.description) + '</p>' : '') +
-      (evs.length ? '<p class="pop-h">Related events</p><ul>' + evs.map((e) => '<li><b>' + esc(F.shortDate(e.date)) + '</b>' + (e.time ? ', ' + esc(e.time) : '') + ' – ' + esc(e.title) + (e.status === 'tentative' ? ' (tentative)' : '') + '</li>').join('') + '</ul>' : '') +
+      (evs.length ? '<p class="pop-h">Related events</p><ul>' + evs.map((e) => '<li><b>' + esc(F.shortDate(e.date)) + '</b>' + (e.time ? ', ' + esc(e.time) : '') + ' â€“ ' + esc(e.title) + (e.status === 'tentative' ? ' (tentative)' : '') + '</li>').join('') + '</ul>' : '') +
       '<a class="btn small primary" href="' + F.mapsLink(l.address || l.name) + '" target="_blank" rel="noopener">Get directions</a></div>';
   };
 
@@ -48,7 +48,7 @@
   P.map = (app, focus) => {
     const shown = F.places.filter((l) => mapFilter === 'all' || l.type === mapFilter);
     const types = Object.keys(F.PLACE_TYPES).filter((k) => shown.some((l) => l.type === k));
-    const item = (l) => { const n = F.events.filter((e) => e.location === l.id).length; return '<li class="' + (l.type === 'house' ? 'is-house' : '') + '"><a href="#/map/' + esc(l.id) + '"><span class="pi t-' + l.type + '">' + F.icon(F.PLACE_TYPES[l.type][0]) + '</span><span><b>' + esc(l.name) + '</b><br><small>' + esc(l.address || 'Address coming soon') + (n ? ' · ' + plural(n, 'event') : '') + '</small></span></a></li>'; };
+    const item = (l) => { const n = F.events.filter((e) => e.location === l.id).length; return '<li class="' + (l.type === 'house' ? 'is-house' : '') + '"><a href="#/map/' + esc(l.id) + '"><span class="pi t-' + l.type + '">' + F.icon(F.PLACE_TYPES[l.type][0]) + '</span><span><b>' + esc(l.name) + '</b><br><small>' + esc(l.address || 'Address coming soon') + (n ? ' Â· ' + plural(n, 'event') : '') + '</small></span></a></li>'; };
     app.innerHTML = '<h1>' + F.pageTitle('map') + '</h1><p class="sub">Tap a pin for the address, details and events. Coral pins are our houses.</p>' +
       '<div class="chips" role="group" aria-label="Filter places">' + chip('data-f', 'all', mapFilter === 'all', 'All') +
       Object.keys(F.PLACE_TYPES).map((k) => chip('data-f', k, mapFilter === k, F.icon(F.PLACE_TYPES[k][0]) + F.PLACE_TYPES[k][1])).join('') + '</div>' +
@@ -77,22 +77,4 @@
     }, () => { const el = $('#map'); if (el) el.outerHTML = '<p class="note">The map needs an internet connection. The list below still works, and each house has a Directions button.</p>'; });
   };
 
-  let mealFilter = 'all';
-  P.meals = (app) => {
-    const all = F.events.filter(F.isMeal);
-    const extra = F.MEAL_TYPES.filter((t) => ['breakfast', 'lunch', 'dinner'].indexOf(t) < 0 && all.some((e) => e.mealType === t));
-    const tests = { all: () => true, dinner: F.isDinner, morning: (e) => e.mealType === 'breakfast' || e.mealType === 'lunch' };
-    extra.forEach((t) => { tests[t] = (e) => e.mealType === t; });
-    const test = tests[mealFilter] || tests.all;
-    const showGaps = mealFilter === 'all' || mealFilter === 'dinner';
-    const today = F.today();
-    const days = F.days.map((d) => [d, d.events.filter((e) => F.isMeal(e) && test(e))]).filter((x) => x[1].length || (showGaps && x[0].dinner !== false));
-    app.innerHTML = '<h1>' + F.pageTitle('meals') + '</h1><p class="sub">Who is hosting, where, and when. Tap any meal in the grid for details.</p>' + F.mealBoard() +
-      '<h2>Meal details</h2><div class="chips" role="group" aria-label="Filter meals">' + chip('data-m', 'all', mealFilter === 'all', 'All') + chip('data-m', 'dinner', mealFilter === 'dinner', 'Dinners') + chip('data-m', 'morning', mealFilter === 'morning', 'Breakfast & lunch') +
-      extra.map((t) => chip('data-m', t, mealFilter === t, esc(t.charAt(0).toUpperCase() + t.slice(1)))).join('') + '</div>' +
-      (days.map((x) => { const d = x[0];
-        return '<h2 class="day' + (d.date === today ? ' today' : '') + '" id="m-' + d.date + '">' + esc(F.longDate(d.date)) + (d.date === today ? '<span class="tag today">Today</span>' : '') + '</h2>' +
-          x[1].map((e) => F.eventCard(e)).join('') + (showGaps && !F.dinnerOn(d.date) ? '<p class="gap-note">Dinner: ' + esc(d.dinner || 'Not planned yet') + '</p>' : ''); }).join('') || '<p class="empty">No meals planned yet.</p>');
-    app.querySelectorAll('[data-m]').forEach((b) => { b.onclick = () => { mealFilter = b.dataset.m; P.meals(app); }; });
-  };
 })(window.FOX);

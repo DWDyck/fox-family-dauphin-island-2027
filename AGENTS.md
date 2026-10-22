@@ -5,8 +5,8 @@ Context for AI agents working on the Fox Family Dauphin Island 2027 vacation sit
 ## What this is
 A static, mobile-first family vacation dashboard on GitHub Pages. Vanilla JS and CSS: **no build step, no npm, no server, no framework**. Repo `dwdike-maker/fox-family-dauphin-island-2027`, live at https://dwdike-maker.github.io/fox-family-dauphin-island-2027/. Users are non-technical family members on phones; simplicity and quick scanning beat features.
 
-## Navigation (exactly seven; do not add tabs)
-`F.NAV` in `js/util.js`: 🏖️ This Week (`home`), 🌤️ Weather, 🍽️ Meals, 📅 Calendar, 🗺️ Map, 🏠 Houses & Family (`houses`), 📸 Photos & Memories (`photos`). Hash router: `#/route/arg`. Old `#/family`, `#/gallery`, `#/memories` redirect via `ALIASES` in `app.js`. `#/check` is a hidden data-validation page linked from the footer. Emoji appear only in nav and page titles; elsewhere use the SVG icon set (`F.icon`).
+## Navigation (exactly five tabs; do not add more)
+`F.NAV` in `js/util.js`: 🏖️ This Week (`home`), 🗺️ Map, 🌤️ Weather, 🏠 Houses & Family (`houses`), 📸 Photos & Memories (`photos`). The Calendar page (`#/calendar/<date>`) is not a tab; the weekly table links to it (`F.EXTRA_PAGES`). `#/meals` redirects home. Hash router: `#/route/arg`. Old `#/family`, `#/gallery`, `#/memories` redirect via `ALIASES` in `app.js`. `#/check` is a hidden data-validation page linked from the footer. Emoji appear only in nav and page titles; elsewhere use the SVG icon set (`F.icon`).
 
 ## Files
 ```
@@ -17,8 +17,8 @@ data/             config, houses, locations, families, schedule, photos, memorie
 js/util.js        namespace window.FOX (F), date helpers, lookups, F.NAV, icons, builds F.days/F.events
 js/components.js  shared HTML builders: agendaRow, dayList, eventCard, mealBoard, photoTile, lightbox, ICS and copy handlers
 js/weather.js     Open-Meteo client (cached in localStorage), F.weatherNow tile, #/weather page
-js/pages.js       calendar, map, meals pages (+ F.ui helpers)
-js/home.js        This Week dashboard
+js/pages.js       calendar and map pages (+ F.ui helpers)
+js/home.js        This Week: title card + weekly table only
 js/houses.js      merged houses + families
 js/photos.js      merged photos + memories (optional `year` for past trips)
 js/check.js       data validation (#/check)
@@ -38,7 +38,7 @@ Script load order matters (data, util, components, weather, check, pages, home, 
 - **CSS**: colours only via tokens in section 1 (light `:root`, one dark block `:root[data-theme=dark]`). Use spacing tokens `--s1..--s6`, 48px minimum touch targets, respect `prefers-reduced-motion`. Dark theme is warm coastal: deep ocean, Gulf turquoise `--accent`, coral `--coral`, sand.
 - Always `esc()` interpolated text; build HTML strings in the existing style.
 - Accessibility: landmarks, `aria-current` on nav, labelled regions, visible focus, text not colour alone (tentative = dashed edge + label).
-- Home page order: weekly meal board first (horizontally scrollable on phones, min-width 600px, sticky day column), then hero/countdown, weather and today cards.
+- Home page: title card (countdown) then the weekly meal board (horizontally scrollable on phones, min-width 600px, sticky day column). Nothing else.
 - Edit emoji with `\u{...}` escapes in JS; PowerShell mangles emoji in files.
 
 ## Develop and test
@@ -49,10 +49,10 @@ No tooling required.
 4. Open `#/check` and confirm no errors.
 
 ## Deploy
-Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R dwdike-maker/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v7`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
+Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R dwdike-maker/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v8`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
 
 ## External services
 Open-Meteo (weather, no key), OpenStreetMap tiles and Leaflet from unpkg (map, loaded lazily), Nominatim (geocoding addresses lacking lat/lng, cached). All degrade gracefully offline.
 
 ## History
-v1 theme and weather; v2 meal board; v3 dashboard refactor (7-item nav, Latest Updates removed, merged pages, coastal theme); v4 weekly board moved to top, Next Meal/Next Event cards removed. See `REVIEW.md` for the design and date-handling review.
+v1 theme and weather; v2 meal board; v3 dashboard refactor (7-item nav, Latest Updates removed, merged pages, coastal theme); v4 weekly board moved to top; v5 home reduced to title card + table, tabs reordered to Week/Map/Weather/Houses/Photos, Meals tab removed. See `REVIEW.md` for the design and date-handling review.
