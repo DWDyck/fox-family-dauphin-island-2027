@@ -8,7 +8,9 @@ A mobile-first family vacation dashboard: the week's meals and plans in one tabl
 🏖️ This Week · 🗺️ Map · 🌤️ Weather · 🏠 Houses & Family · 📸 Photos & Memories
 
 ## Update the content
-Edit the files in `data/`, commit and push; the site updates in a few minutes.
+**Easiest: open `admin.html`** in Chrome or Edge (double-click it on your computer). Click *Connect project folder* once, add or edit events, families, houses, places, photos and memories with simple forms, then *Save*. Photos are resized automatically. Publish with GitHub Desktop or `git add -A; git commit -m "Update"; git push`; the site updates in a few minutes. Free, local, no account or hosting.
+
+Or edit the files in `data/` by hand:
 
 | To change | Edit |
 |---|---|
