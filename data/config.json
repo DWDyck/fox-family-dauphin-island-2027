@@ -8,6 +8,10 @@
     "lat": 30.2552,
     "lng": -88.1097
   },
+  "tides": {
+    "station": "8735180",
+    "name": "Dauphin Island, AL"
+  },
   "map": {
     "lat": 30.2495,
     "lng": -88.115,

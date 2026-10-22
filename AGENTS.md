@@ -19,7 +19,7 @@ data/             config, houses, locations, families, schedule, photos, memorie
 js/boot.js        fetches data/*.json, builds window.FOX (ids from names, name->id references, albums), then loads the other scripts in order
 js/util.js        namespace window.FOX (F), date helpers, lookups, F.NAV, icons, builds F.days/F.events
 js/components.js  shared HTML builders: agendaRow, dayList, eventCard, mealBoard, photoTile, lightbox, ICS and copy handlers
-js/weather.js     Open-Meteo client (cached in localStorage), F.weatherNow tile, #/weather page
+js/weather.js     Open-Meteo client + NOAA tide predictions (cached in localStorage), F.weatherNow tile, #/weather page
 js/pages.js       calendar and map pages (+ F.ui helpers)
 js/home.js        This Week: title card + weekly table only
 js/houses.js      merged houses + families
@@ -62,10 +62,10 @@ No tooling required.
 4. Open `#/check` and confirm no errors.
 
 ## Deploy
-Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R DWDyck/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v12`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
+Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R DWDyck/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v13`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
 
 ## External services
-Open-Meteo (weather, no key), OpenStreetMap tiles and Leaflet from unpkg (map, loaded lazily), Nominatim (geocoding addresses lacking lat/lng, cached). All degrade gracefully offline.
+Open-Meteo (weather, no key), NOAA CO-OPS (high/low tide predictions on the Weather page; station in `config.tides`, default Dauphin Island 8735180; no key), OpenStreetMap tiles and Leaflet from unpkg (map, loaded lazily), Nominatim (geocoding addresses lacking lat/lng, cached). All degrade gracefully offline.
 
 ## History
 v1 theme and weather; v2 meal board; v3 dashboard refactor (7-item nav, Latest Updates removed, merged pages, coastal theme); v4 weekly board moved to top; v5 home reduced to title card + table, tabs reordered to Week/Map/Weather/Houses/Photos, Meals tab removed; v6 data moved to JSON with Pages CMS editing, admin.html removed. See `REVIEW.md` for the design and date-handling review.

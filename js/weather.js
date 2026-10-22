@@ -16,7 +16,7 @@
     try { c = JSON.parse(localStorage.getItem(key)); } catch (e) {}
     if (c && Date.now() - c.t < ttl) return Promise.resolve({ data: c.d, t: c.t, stale: false });
     return fetch(url).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then((d) => {
-      if (d.error) throw new Error(d.reason || 'API error');
+      if (d.error) throw new Error(d.reason || (d.error && d.error.message) || 'API error');
       try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {}
       return { data: d, t: Date.now(), stale: false };
     }).catch((err) => { if (c) return { data: c.d, t: c.t, stale: true }; throw err; });
@@ -46,6 +46,31 @@
         return { date: date, hi: avg('hi'), lo: avg('lo'), rainPct: Math.round(100 * rows.filter((r) => r.rain >= 0.04).length / rows.length), years: rows.length };
       });
     });
+  };
+
+  // Tides: high and low predictions from NOAA CO-OPS (free, no key). Times are station local time (Central).
+  const TIDE_API = 'https://api.tidesandcurrents.noaa.gov/api/prod/datagetter';
+  const TIDE = Object.assign({ station: '8735180', name: 'Dauphin Island, AL' }, cfg.tides);
+  const compact = (s) => s.replace(/-/g, '');
+  const tides = (dates) => get(TIDE_API + '?' + qs({
+    product: 'predictions', application: 'fox-family-dauphin-island', station: TIDE.station, datum: 'MLLW', time_zone: 'lst_ldt',
+    units: 'english', interval: 'hilo', format: 'json', begin_date: compact(dates[0]), end_date: compact(dates[dates.length - 1])
+  }), 7 * DAY).then((r) => {
+    if (!r.data.predictions || !r.data.predictions.length) throw new Error('No tide data');
+    const by = {};
+    r.data.predictions.forEach((p) => { (by[p.t.slice(0, 10)] = by[p.t.slice(0, 10)] || []).push(p); });
+    return { by: by, stale: r.stale, t: r.t };
+  });
+  const clock = (t) => { const h = +t.slice(11, 13), m = t.slice(14, 16); return (h % 12 || 12) + ':' + m + (h < 12 ? ' AM' : ' PM'); };
+  const tideRow = (date, list) => '<li class="tide-row"><div class="d">' + esc(F.weekdayShort(date)) + '<small>' + esc(F.monthShort(date) + ' ' + F.dayNum(date)) + '</small></div><ul class="tide-times">' +
+    list.map((p) => '<li class="' + (p.type === 'H' ? 'hi' : 'lo') + '"><span>' + (p.type === 'H' ? '&#9650; High' : '&#9660; Low') + '</span><b>' + esc(clock(p.t)) + '</b><small>' + (+p.v).toFixed(1) + ' ft</small></li>').join('') + '</ul></li>';
+  const tideSection = (el, dates) => {
+    el.innerHTML = '<p class="sub">Looking up the tides…</p>';
+    tides(dates).then((x) => {
+      el.innerHTML = (x.stale ? '<p class="wx-alert">You appear to be offline. Showing tides saved ' + esc(ago(x.t)) + '.</p>' : '') +
+        '<ul class="wx-list">' + dates.map((t) => tideRow(t, x.by[t] || [])).join('') + '</ul>' +
+        '<p class="wx-src">Tide predictions for ' + esc(TIDE.name) + ' from <a href="https://tidesandcurrents.noaa.gov/noaatidepredictions.html?id=' + esc(TIDE.station) + '" target="_blank" rel="noopener">NOAA Tides &amp; Currents</a>. Heights are feet above the average lowest tide. Wind and storms can change the actual tide.</p>';
+    }).catch(() => { el.innerHTML = '<p class="empty">Tide times are unavailable right now.</p><p class="row" style="justify-content:center"><button type="button" class="small">Try again</button></p>'; el.querySelector('button').onclick = () => tideSection(el, dates); });
   };
 
   const U = (c) => String.fromCodePoint(c);
@@ -106,9 +131,11 @@
         '<div class="wx-stats"><div><span>Wind</span><b>' + Math.round(c.wind_speed_10m) + ' mph</b></div><div><span>Gusts</span><b>' + Math.round(c.wind_gusts_10m) + ' mph</b></div><div><span>Humidity</span><b>' + Math.round(c.relative_humidity_2m) + '%</b></div><div><span>UV today</span><b>' + Math.round(d.daily.uv_index_max[0]) + '</b></div></div></div>' +
         '<h2>Next 24 hours</h2><ul class="wx-hours" aria-label="Hourly forecast">' + hrs.map((i, n) => '<li><b>' + (n === 0 ? 'Now' : hourLabel(d.hourly.time[i])) + '</b>' + ico(d.hourly.weather_code[i]) + '<b>' + deg(d.hourly.temperature_2m[i]) + '</b><small>' + (d.hourly.precipitation_probability[i] || 0) + '% rain</small></li>').join('') + '</ul>' +
         '<h2>Our week</h2><div id="wx-trip"></div>' +
+        '<h2>Tides for our week</h2><div id="wx-tides"></div>' +
         '<h2>Next 7 days</h2><ul class="wx-list">' + d.daily.time.slice(0, 7).map((t, i) => dayRow(d, i)).join('') + '</ul>' +
         '<p class="wx-src">Forecast data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>. Updated ' + esc(ago(r.t)) + '.</p>';
       body.innerHTML = html;
+      tideSection($('#wx-tides'), trip);
       const box = $('#wx-trip');
       const list = inRange.map((t) => dayRow(d, d.daily.time.indexOf(t), { trip: true }));
       if (!need.length) { box.innerHTML = '<ul class="wx-list">' + list.join('') + '</ul>'; return; }

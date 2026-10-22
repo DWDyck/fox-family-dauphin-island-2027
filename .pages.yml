@@ -276,6 +276,12 @@ content:
         fields:
           - { name: lat, label: Latitude, type: number }
           - { name: lng, label: Longitude, type: number }
+      - name: tides
+        label: Tide station (NOAA)
+        type: object
+        fields:
+          - { name: station, label: NOAA station ID, type: string }
+          - { name: name, label: Station name, type: string }
       - name: map
         label: Map start view
         type: object

@@ -28,7 +28,7 @@ Content lives in `data/*.json` (`schedule`, `houses`, `families`, `locations`, `
 Open `index.html`, or serve the folder with any static server. Host on GitHub Pages from `main` / root.
 
 ## Good to know
-- Everything is free: GitHub Pages hosting, Pages CMS, Open-Meteo weather, OpenStreetMap.
+- Everything is free: GitHub Pages hosting, Pages CMS, Open-Meteo weather, NOAA tide times, OpenStreetMap.
 - Not yet tested end to end: the first Pages CMS sign-in and photo upload. If photo paths or the auto-shrink Action misbehave, see AGENTS.md.
 - Ideas for later: a calendar (ICS) export for phones, and keeping private photos in a shared album (Google Photos or iCloud) linked from the site instead of in this public repo.
 
