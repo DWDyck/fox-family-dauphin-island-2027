@@ -31,7 +31,7 @@ Script load order matters (data, util, components, weather, check, pages, home, 
 - Reference by id: `location` -> houses.js or locations.js; `host` -> families.js; family `house` -> houses.js id.
 - Dinner = meal not breakfast/lunch at 3 PM or later (`F.isDinner`).
 - Photos/memories: optional `year` (past trips show under "Past vacations"); photo `album` must be in `FOX.albums`.
-- Sample data (addresses, codes, phones, 2026 memories) is placeholder. Repo is public: never commit real door or Wi-Fi codes.
+- Sample data (addresses, codes, phones, 2026 memories) is placeholder. Repo is public: there are intentionally NO door/gate/Wi-Fi code fields; never add them.
 
 ## Conventions
 - **Dates**: strings only; use `F.parse/ymd/addDays/daysBetween/today/shortDate/longDate` etc. Never `new Date('YYYY-MM-DD')` or ad hoc formatting. `F.today()` uses `America/Chicago` and honors `?today=YYYY-MM-DD`. `F.nowMinutes()`/`F.nextEvent()` give island time.
