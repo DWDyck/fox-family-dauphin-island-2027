@@ -47,6 +47,13 @@ Script load order matters; `boot.js` loads util, components, weather, check, pag
 ## Editing UI (Pages CMS)
 Content is edited with Pages CMS (https://app.pagescms.org) using `.pages.yml`; it commits JSON straight to `main`. If you add or rename a data field, update `.pages.yml`, `js/boot.js` and `js/check.js` together. Pages CMS rewrites a JSON file from its defined fields only, so any field not in `.pages.yml` can be lost on the next save. Image fields write relative paths (`images/photos/x.jpg`); `boot.js` also strips a leading `/`. There are intentionally no contact fields (phone/email) or door/Wi-Fi/gate codes. `config.lastUpdated` was removed (the footer stamp shows only if it is set).
 
+### Pages CMS decisions and open items
+- **Why Pages CMS:** the owner is non-technical and found the earlier local `admin.html` (File System Access API, folder picking, manual git) confusing. A hosted editor that commits to GitHub removes folder and git steps. It is free and open source; editors sign in with GitHub and need write access to the repo (first use installs the Pages CMS GitHub App on the repo).
+- **Why names, not ids:** Pages CMS has no dropdown over entries of a single list file (`reference` needs a collection of files, and GitHub Pages cannot list a folder), so references are typed names. Changing a house/place/family name breaks references to it until they are updated; `#/check` shows them.
+- **Not yet verified against the real service:** the Pages CMS sign-in flow, whether `.pages.yml` loads cleanly, that image fields write relative paths like `images/photos/x.jpg` (not `/images/...`; `boot.js` strips a leading slash anyway), and that the shrink-photos Action's bot commit triggers a Pages rebuild. Verify these on the first real edit and fix `.pages.yml` or the workflow if needed.
+- **Data must be fetched:** `boot.js` uses `fetch`, so the site needs HTTP(S); `file://` does not work. Test with a static server.
+- **Ideas not built:** ICS export of the schedule, private photo albums linked externally, moving to a private repo (Netlify/Cloudflare Pages/Vercel free tiers) if privacy is needed.
+
 ## Develop and test
 No tooling required.
 1. `node --check` each JS file. Validate `data/*.json` parse.
