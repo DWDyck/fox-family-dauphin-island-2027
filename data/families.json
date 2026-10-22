@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Grandma & Grandpa Fox",
+    "members": [
+      "Grandma",
+      "Grandpa"
+    ],
+    "photo": "",
+    "house": "Fox House"
+  },
+  {
+    "name": "Ben & Sarah Fox",
+    "members": [
+      "Ben",
+      "Sarah",
+      "Emma",
+      "Liam"
+    ],
+    "photo": "",
+    "house": "Pelican Cottage"
+  },
+  {
+    "name": "Amy & Tom Miller",
+    "members": [
+      "Amy",
+      "Tom",
+      "Noah",
+      "Ava",
+      "Mia"
+    ],
+    "photo": "",
+    "house": "Seagull Shores"
+  }
+]

@@ -3,7 +3,7 @@
 ## Date consistency review
 Found: dates kept in three places (config trip dates, per-event strings, update dates); arrival/departure events duplicating trip dates; times sorted as text ("10:00 AM" before "8:00 AM"); "today" taken from the viewer's timezone; mixed date formats and locales; free-text `lastUpdated`; banner text hard-coding times and places; undated photos and memories; weather labelled "Today" before the trip; silent dinner gaps (Jun 20, 22, 25).
 
-Fixed: `data/schedule.js` is the single source. Days own the date, events nest under them, trip start/end derive from it. Times sort by minutes. "Today" uses the configured timezone (America/Chicago). All formats are fixed en-US helpers. Banner updates reference an event id so time and place stay in sync. `#/check` verifies Saturday Jun 19 to Saturday Jun 26, 2027, weekdays, duplicates, ordering and references.
+Fixed: `data/schedule.json` is the single source. Days own the date, events nest under them, trip start/end derive from it. Times sort by minutes. "Today" uses the configured timezone (America/Chicago). All formats are fixed en-US helpers. Banner updates reference an event id so time and place stay in sync. `#/check` verifies Saturday Jun 19 to Saturday Jun 26, 2027, weekdays, duplicates, ordering and references.
 
 ## UX review
 - Home now centers on the week: next dinner, Today and Tomorrow, 8-day week view, tentative list.
@@ -29,7 +29,7 @@ Keep one file per content type (see README). Reference by id (host, location, ev
 - Code: one file per page group (`pages.js` calendar/map/meals, `home.js`, `houses.js`, `photos.js`, `weather.js`). `styles.css` is organized as tokens, base, nav, layout, components, wide screens; colours come only from tokens, with a single dark block (the inline head script always sets `data-theme`). Spacing and radius tokens, 48px touch targets, reduced-motion respected, houses page no longer loads Leaflet.
 
 ## Modified files (earlier rounds)
-Added: `data/schedule.js`, `js/check.js`, `REVIEW.md`. Removed: `data/events.js`. Rewritten: `js/util.js`, `js/components.js`, `js/pages.js`, `js/app.js`, `styles.css`, `README.md`. Edited: `index.html`, `sw.js`, `data/config.js`, `data/updates.js`, `data/photos.js`, `data/memories.js`.
+Added: `data/schedule.json`, `js/check.js`, `REVIEW.md`. Removed: `data/events.js`. Rewritten: `js/util.js`, `js/components.js`, `js/pages.js`, `js/app.js`, `styles.css`, `README.md`. Edited: `index.html`, `sw.js`, `data/config.js`, `data/updates.js`, `data/photos.js`, `data/memories.js`.
 
 ## Update (v8)
 Home is now only the title card and the weekly table. Tabs: This Week, Map, Weather, Houses & Family, Photos & Memories. Meals tab removed (`#/meals` redirects home); Calendar remains as a linked, non-tab page.

@@ -10,11 +10,13 @@ A static, mobile-first family vacation dashboard on GitHub Pages. Vanilla JS and
 
 ## Files
 ```
-admin.html        LOCAL content editor (forms -> writes data/*.js + resized images via File System Access API, bumps sw.js VERSION). Not linked from the site.
+.pages.yml        Pages CMS form definitions for data/*.json (the editing UI; sign in at app.pagescms.org)
+.github/workflows/shrink-photos.yml  Action: resizes uploaded images over 1600 px
 index.html        shell, inline theme script (sets data-theme before paint), script order
 styles.css        all CSS: 1 tokens, 2 base, 3 header/nav, 4 layout, 5 components, 6 wide screens/print
 sw.js             service worker (network first). Bump VERSION on every deploy; list new files in CORE
-data/             config, houses, locations, families, schedule, photos, memories  (content only)
+data/             config, houses, locations, families, schedule, photos, memories  (content only, JSON)
+js/boot.js        fetches data/*.json, builds window.FOX (ids from names, name->id references, albums), then loads the other scripts in order
 js/util.js        namespace window.FOX (F), date helpers, lookups, F.NAV, icons, builds F.days/F.events
 js/components.js  shared HTML builders: agendaRow, dayList, eventCard, mealBoard, photoTile, lightbox, ICS and copy handlers
 js/weather.js     Open-Meteo client (cached in localStorage), F.weatherNow tile, #/weather page
@@ -25,13 +27,13 @@ js/photos.js      merged photos + memories (optional `year` for past trips)
 js/check.js       data validation (#/check)
 js/app.js         router, nav render, theme and text-size toggles
 ```
-Script load order matters (data, util, components, weather, check, pages, home, houses, photos, app). Pages register as `F.pages[name] = (app, arg) => {...}` and set `app.innerHTML`.
+Script load order matters; `boot.js` loads util, components, weather, check, pages, home, houses, photos, app in that order after the data. `index.html` only includes `boot.js`. Pages register as `F.pages[name] = (app, arg) => {...}` and set `app.innerHTML`.
 
 ## Data model
-- `data/schedule.js` is the **only** source of dates. Days `{date:'YYYY-MM-DD', title?, dinner?, events:[...]}` with no gaps; events `{id,title,time:'6:30 PM',category,status,location,host,mealType,description,notes}`. Trip start/end/count derive from it (`F.trip`). Trip: Sat 2027-06-19 to Sat 2027-06-26.
-- Reference by id: `location` -> houses.js or locations.js; `host` -> families.js; family `house` -> houses.js id.
+- `data/schedule.json` is the **only** source of dates. Days `{date:'YYYY-MM-DD', title?, noDinner?, dinnerNote?, events:[...]}` (boot.js turns noDinner/dinnerNote into `dinner:false|'text'`) with no gaps; events `{id,title,time:'6:30 PM',category,status,location,host,mealType,description,notes}`. Trip start/end/count derive from it (`F.trip`). Trip: Sat 2027-06-19 to Sat 2027-06-26.
+- References are by **name** in the JSON (event `location` = house or place name, `host` = family name, family `house` = house name); `boot.js` slugifies names into ids and resolves them. Unmatched names are reported by `#/check`. Ids are not stored.
 - Dinner = meal not breakfast/lunch at 3 PM or later (`F.isDinner`).
-- Photos/memories: optional `year` (past trips show under "Past vacations"); photo `album` must be in `FOX.albums`.
+- Photos/memories: optional `year` (past trips show under "Past vacations"); albums are derived from the distinct `album` names on photos.
 - Sample data (addresses, codes, phones, 2026 memories) is placeholder. Repo is public: there are intentionally NO door/gate/Wi-Fi code fields; never add them.
 
 ## Conventions
@@ -42,21 +44,21 @@ Script load order matters (data, util, components, weather, check, pages, home, 
 - Home page: title card (countdown) then the weekly meal board (horizontally scrollable on phones, min-width 600px, sticky day column). Nothing else.
 - Edit emoji with `\u{...}` escapes in JS; PowerShell mangles emoji in files.
 
-## Admin editor (admin.html)
-Self-contained page that loads the data files, edits an in-memory copy, and regenerates `data/*.js` (comments are regenerated from headers in the page). If you change a data field or schema, update `FIELDS`, `HDR` and `validate()` in `admin.html` too. No contact fields (phone/email) or door/Wi-Fi codes exist on purpose. Test by serving the folder and opening `admin.html`; Save requires a connected project folder in Chrome/Edge (it prompts to connect; it never silently downloads). Downloads are only a fallback for browsers without the folder API. `window.FOXADMIN` exposes `texts()` and `validate()`.
+## Editing UI (Pages CMS)
+Content is edited with Pages CMS (https://app.pagescms.org) using `.pages.yml`; it commits JSON straight to `main`. If you add or rename a data field, update `.pages.yml`, `js/boot.js` and `js/check.js` together. Pages CMS rewrites a JSON file from its defined fields only, so any field not in `.pages.yml` can be lost on the next save. Image fields write relative paths (`images/photos/x.jpg`); `boot.js` also strips a leading `/`. There are intentionally no contact fields (phone/email) or door/Wi-Fi/gate codes. `config.lastUpdated` was removed (the footer stamp shows only if it is set).
 
 ## Develop and test
 No tooling required.
-1. `node --check` each JS file.
+1. `node --check` each JS file. Validate `data/*.json` parse.
 2. Serve statically (e.g. a tiny Node server, port 8123); open `index.html?today=2027-06-22` to preview a trip day (also test a pre-trip and post-trip date).
 3. Headless Edge screenshots (`msedge --headless=new --window-size=500,1000 --screenshot=...`) at about 500 and 1100 px, light and dark.
 4. Open `#/check` and confirm no errors.
 
 ## Deploy
-Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R dwdike-maker/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v10`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
+Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R dwdike-maker/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v12`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
 
 ## External services
 Open-Meteo (weather, no key), OpenStreetMap tiles and Leaflet from unpkg (map, loaded lazily), Nominatim (geocoding addresses lacking lat/lng, cached). All degrade gracefully offline.
 
 ## History
-v1 theme and weather; v2 meal board; v3 dashboard refactor (7-item nav, Latest Updates removed, merged pages, coastal theme); v4 weekly board moved to top; v5 home reduced to title card + table, tabs reordered to Week/Map/Weather/Houses/Photos, Meals tab removed. See `REVIEW.md` for the design and date-handling review.
+v1 theme and weather; v2 meal board; v3 dashboard refactor (7-item nav, Latest Updates removed, merged pages, coastal theme); v4 weekly board moved to top; v5 home reduced to title card + table, tabs reordered to Week/Map/Weather/Houses/Photos, Meals tab removed; v6 data moved to JSON with Pages CMS editing, admin.html removed. See `REVIEW.md` for the design and date-handling review.

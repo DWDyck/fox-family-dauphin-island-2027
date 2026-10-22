@@ -19,7 +19,7 @@
     app.innerHTML = '<h1>' + F.pageTitle('photos') + '</h1><p class="sub">Our digital scrapbook, this year and every year before.</p>' +
       '<h2 class="first">' + cur + ' photos</h2>' +
       (albums.length ? '<div class="chips" role="group" aria-label="Albums">' + F.ui.chip('data-a', 'all', album === 'all', 'All') + albums.map((a) => F.ui.chip('data-a', a, album === a, esc(a))).join('') + '</div>' : '') +
-      (now.length ? tiles(now) : '<p class="empty">No photos yet. Add them to the images folder and data/photos.js.</p>') +
+      (now.length ? tiles(now) : '<p class="empty">No photos yet. They appear here once added in the editor.</p>') +
       (highlights.length ? '<h2>Family highlights</h2>' + tiles(highlights) : '') +
       (stories.length ? '<h2>' + cur + ' stories</h2>' + stories.map(memory).join('') : '') +
       (past.length ? '<h2>Past vacations</h2><div class="chips" role="group" aria-label="Jump to a year">' + past.map((y) => '<a class="chip" href="#/photos/' + y + '">' + y + '</a>').join('') + '</div>' +

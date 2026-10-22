@@ -1,4 +1,4 @@
-/* Data check: finds mistakes in the data files. Open index.html#/check after editing. Nothing here changes what visitors see. */
+/* Data check: finds mistakes in the data files (data/*.json). Open the site's #/check page after editing. Nothing here changes what visitors see. */
 (function (F) {
   const { esc } = F;
   const out = [];
@@ -10,10 +10,10 @@
 
   // Dates in the schedule
   const sched = F.schedule || [];
-  if (!sched.length) add('error', 'schedule.js', 'No days found. Add at least one day.');
+  if (!sched.length) add('error', 'Schedule', 'No days found. Add at least one day.');
   sched.forEach((d, i) => {
-    if (!iso(d.date)) { add('error', 'schedule.js', 'Day ' + (i + 1) + ' has an invalid date "' + d.date + '". Use YYYY-MM-DD with a real calendar date.'); return; }
-    if (+d.date.slice(0, 4) !== F.config.year) add('error', nice(d.date), 'Year is ' + d.date.slice(0, 4) + ' but the site year is ' + F.config.year + ' (config.js).');
+    if (!iso(d.date)) { add('error', 'Schedule', 'Day ' + (i + 1) + ' has an invalid date "' + d.date + '". Use YYYY-MM-DD with a real calendar date.'); return; }
+    if (+d.date.slice(0, 4) !== F.config.year) add('error', nice(d.date), 'Year is ' + d.date.slice(0, 4) + ' but the site year is ' + F.config.year + ' (Site settings).');
     if (i && iso(sched[i - 1].date)) {
       const gap = F.daysBetween(sched[i - 1].date, d.date);
       if (gap === 0) add('error', nice(d.date), 'This date is listed twice. Merge the two blocks.');
@@ -24,14 +24,14 @@
 
   // Events
   const ids = dupes(F.events, (e) => e.id);
-  ids.forEach((id) => add('error', id, 'Two events share the id "' + id + '". Ids must be unique.'));
+  ids.forEach((id) => add('error', id, 'Two events share the id "' + id + '". Give one a different title.'));
   F.events.forEach((e) => {
     const w = nice(e.date) + ' - ' + (e.title || '(no title)');
     if (!e.title) add('error', w, 'Event has no title.');
     if (e.status !== 'confirmed' && e.status !== 'tentative') add('error', w, 'status must be \'confirmed\' or \'tentative\' (it is "' + e.status + '").');
     if (CATS.indexOf(e.category) < 0) add('warn', w, 'category "' + e.category + '" is not one of: ' + CATS.join(', ') + '.');
-    if (e.location && !F.place(e.location)) add('error', w, 'location "' + e.location + '" does not match any id in houses.js or locations.js.');
-    if (e.host && !F.family(e.host)) add('error', w, 'host "' + e.host + '" does not match any id in families.js.');
+    if (e.location && !F.place(e.location)) add('error', w, 'location "' + e.location + '" does not match the name of any house or map place. Type it exactly as it appears under Houses or Map places.');
+    if (e.host && !F.family(e.host)) add('error', w, 'host "' + e.host + '" does not match the name of any family.');
     if (F.isMeal(e)) {
       if (e.mealType && MEALS.indexOf(e.mealType) < 0) add('warn', w, 'mealType "' + e.mealType + '" is not one of: ' + MEALS.join(', ') + '.');
       if (!e.host) add('warn', w, 'Meal has no host family.');
@@ -43,14 +43,14 @@
 
   // Dinners
   F.days.forEach((d) => {
-    if (iso(d.date) && d.dinner !== false && !d.dinner && !F.dinnerOn(d.date)) add('info', nice(d.date), 'No dinner planned yet (the site shows "Not planned yet"). Add a dinner, or set dinner: false / dinner: \'text\' on this day.');
+    if (iso(d.date) && d.dinner !== false && !d.dinner && !F.dinnerOn(d.date)) add('info', nice(d.date), 'No dinner planned yet (the site shows "Not planned yet"). Add a dinner, or on that day tick "No dinner expected" or type a dinner note.');
   });
 
   // Photos and memories
   const inTrip = (s) => F.days.some((d) => d.date === s);
   const thisYear = (x) => !x.year || x.year === F.config.year;
   F.photos.forEach((p, i) => {
-    if (F.albums.indexOf(p.album) < 0) add('error', 'Photo ' + (i + 1), 'album "' + p.album + '" is not in the albums list in photos.js.');
+    if (!p.album) add('warn', 'Photo ' + (i + 1), 'No album set.');
     if (p.year && (!Number.isInteger(p.year) || p.year > F.config.year)) add('error', 'Photo ' + (i + 1), 'year "' + p.year + '" must be a whole year, not after ' + F.config.year + '.');
     if (p.date && thisYear(p) && !inTrip(p.date)) add('warn', 'Photo ' + (i + 1), 'date "' + p.date + '" is not a day of the trip.');
   });
@@ -58,11 +58,11 @@
     if (m.year && (!Number.isInteger(m.year) || m.year > F.config.year)) add('error', 'Memory ' + (i + 1), 'year "' + m.year + '" must be a whole year, not after ' + F.config.year + '.');
     if (m.date && thisYear(m) && !inTrip(m.date)) add('warn', 'Memory ' + (i + 1), 'date "' + m.date + '" is not a day of the trip.');
   });
-  if (F.config.lastUpdated && !iso(F.config.lastUpdated)) add('error', 'config.js', 'lastUpdated must be YYYY-MM-DD (it is "' + F.config.lastUpdated + '").');
+  if (F.config.lastUpdated && !iso(F.config.lastUpdated)) add('error', 'Site settings', 'lastUpdated must be YYYY-MM-DD (it is "' + F.config.lastUpdated + '").');
 
   // Houses, families, places
-  dupes(F.places, (p) => p.id).forEach((id) => add('error', id, 'Two houses/places share the id "' + id + '".'));
-  F.families.forEach((f) => { if (f.house && !F.house(f.house)) add('error', f.name, 'house "' + f.house + '" does not match any id in houses.js.'); if (!f.house) add('warn', f.name, 'No house assigned.'); });
+  dupes(F.places, (p) => p.id).forEach((id) => add('error', id, 'Two houses/places have the same name ("' + id + '"). Rename one.'));
+  F.families.forEach((f) => { if (f.house && !F.house(f.house)) add('error', f.name, 'house "' + f.house + '" does not match the name of any house.'); if (!f.house) add('warn', f.name, 'No house assigned.'); });
   F.places.forEach((p) => {
     if (!p.address) add('warn', p.name, 'No address yet.');
     if (p.lat == null || p.lng == null) add('info', p.name, 'No lat/lng: the map will look the address up online (needs internet). Add lat/lng for an exact pin.');
@@ -76,7 +76,7 @@
   F.pages.check = (app) => {
     const L = { error: 'Fix', warn: 'Check', info: 'Note' };
     const n = (l) => out.filter((p) => p.level === l).length;
-    app.innerHTML = '<h1>Data Check</h1><p class="sub">For the organizers. Open this page after editing the files in the data folder.</p>' +
+    app.innerHTML = '<h1>Data Check</h1><p class="sub">For the organizers. Open this page after editing the schedule, families or houses.</p>' +
       '<div class="card"><b>' + (n('error') ? n('error') + ' error(s) to fix' : 'No errors') + '</b> · ' + n('warn') + ' to check · ' + n('info') + ' notes' +
       '<br>Trip: ' + esc(F.trip.start ? F.fullDate(F.trip.start) + ' to ' + F.fullDate(F.trip.end) : 'no days') + ' (' + F.trip.count + ' days)</div>' +
       (out.length ? '<ul class="checklist">' + out.map((p) => '<li class="' + p.level + '"><b>' + L[p.level] + '</b> <span>' + esc(p.where) + '</span> ' + esc(p.msg) + '</li>').join('') + '</ul>' : '') +

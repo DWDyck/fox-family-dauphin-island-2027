@@ -30,23 +30,7 @@ document.documentElement.setAttribute('data-theme',d?'dark':'light');})();
 <nav class="tabs" id="tabs" aria-label="Main"></nav>
 <dialog id="lightbox" aria-label="Photo viewer"></dialog>
 
-<!-- Data files: edit these to update the site -->
-<script src="data/config.js"></script>
-<script src="data/houses.js"></script>
-<script src="data/locations.js"></script>
-<script src="data/families.js"></script>
-<script src="data/schedule.js"></script>
-<script src="data/photos.js"></script>
-<script src="data/memories.js"></script>
-<!-- Site code -->
-<script src="js/util.js"></script>
-<script src="js/components.js"></script>
-<script src="js/weather.js"></script>
-<script src="js/check.js"></script>
-<script src="js/pages.js"></script>
-<script src="js/home.js"></script>
-<script src="js/houses.js"></script>
-<script src="js/photos.js"></script>
-<script src="js/app.js"></script>
+<!-- Content lives in data/*.json (edit with Pages CMS). boot.js loads it, then loads the site code in js/. -->
+<script src="js/boot.js"></script>
 </body>
 </html>

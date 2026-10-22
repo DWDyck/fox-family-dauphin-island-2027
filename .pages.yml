@@ -1,0 +1,285 @@
+# Pages CMS configuration: this is what turns the data/*.json files into easy forms.
+# Sign in at https://app.pagescms.org with GitHub and open this repository.
+# Houses, places and families are referred to by NAME (type them exactly as written elsewhere).
+
+media:
+  - name: photos
+    label: Photos
+    input: images/photos
+    output: images/photos
+    rename: safe
+    categories: [image]
+  - name: family
+    label: Family pictures
+    input: images/family
+    output: images/family
+    rename: safe
+    categories: [image]
+
+content:
+  - name: schedule
+    label: Schedule
+    type: file
+    path: data/schedule.json
+    format: json
+    list: true
+    fields:
+      - name: date
+        label: Date
+        type: date
+        options:
+          format: yyyy-MM-dd
+        description: One block per day, in order, with no days skipped (days with nothing planned still need a block).
+      - name: title
+        label: Day headline
+        type: string
+        description: Optional, e.g. Arrival Day.
+      - name: noDinner
+        label: No dinner expected
+        type: boolean
+        default: false
+      - name: dinnerNote
+        label: Dinner note
+        type: string
+        description: Optional. Shown instead of "Not planned yet", e.g. Each family on their own.
+      - name: events
+        label: Events and meals
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{time} {title}"
+        fields:
+          - name: title
+            label: Title
+            type: string
+            required: true
+          - name: time
+            label: Time
+            type: string
+            description: Like 6:30 PM (this exact style so events sort correctly).
+          - name: category
+            label: Type
+            type: select
+            default: plan
+            options:
+              values:
+                - { name: plan, label: Plan }
+                - { name: meal, label: Family meal }
+                - { name: excursion, label: Excursion }
+                - { name: beach, label: Beach activity }
+                - { name: arrival, label: Arrival }
+                - { name: departure, label: Departure }
+          - name: mealType
+            label: Meal type (meals only)
+            type: select
+            options:
+              values: [breakfast, lunch, dinner, seafood boil, cookout, celebration, gathering]
+          - name: status
+            label: Status
+            type: select
+            default: confirmed
+            options:
+              values: [confirmed, tentative]
+          - name: host
+            label: Host family
+            type: string
+            description: Family name, exactly as in Families & Houses.
+          - name: location
+            label: Where
+            type: string
+            description: House or map place name, exactly as written there. Meals default to the host family's house.
+          - name: description
+            label: Description
+            type: text
+          - name: notes
+            label: Notes
+            type: text
+
+  - name: families
+    label: Families
+    type: file
+    path: data/families.json
+    format: json
+    list: true
+    fields:
+      - name: name
+        label: Family name
+        type: string
+        required: true
+      - name: house
+        label: Staying at (house name)
+        type: string
+        description: Exactly as the house is named under Houses.
+      - name: members
+        label: People
+        type: string
+        list: true
+      - name: photo
+        label: Photo (optional)
+        type: image
+        options:
+          media: family
+
+  - name: houses
+    label: Houses
+    type: file
+    path: data/houses.json
+    format: json
+    list: true
+    fields:
+      - name: name
+        label: House name
+        type: string
+        required: true
+      - name: address
+        label: Address
+        type: string
+      - name: lat
+        label: Map latitude (optional)
+        type: number
+      - name: lng
+        label: Map longitude (optional)
+        type: number
+      - name: description
+        label: Description
+        type: text
+      - name: parking
+        label: Parking
+        type: text
+      - name: manager
+        label: Property manager
+        type: object
+        fields:
+          - name: name
+            label: Name
+            type: string
+      - name: notes
+        label: Notes
+        type: text
+
+  - name: locations
+    label: Map places
+    type: file
+    path: data/locations.json
+    format: json
+    list: true
+    fields:
+      - name: name
+        label: Place name
+        type: string
+        required: true
+      - name: type
+        label: Kind of place
+        type: select
+        options:
+          values: [restaurant, grocery, beach, activity, gathering]
+      - name: address
+        label: Address
+        type: string
+      - name: lat
+        label: Map latitude (optional)
+        type: number
+      - name: lng
+        label: Map longitude (optional)
+        type: number
+      - name: description
+        label: Description
+        type: text
+
+  - name: photos
+    label: Photos
+    type: file
+    path: data/photos.json
+    format: json
+    list: true
+    fields:
+      - name: src
+        label: Photo
+        type: image
+        required: true
+        options:
+          media: photos
+      - name: caption
+        label: Caption
+        type: string
+      - name: album
+        label: Album
+        type: string
+        description: Any name, e.g. Beach Days. Photos with the same album name are grouped together.
+      - name: year
+        label: Year (past trips only)
+        type: number
+        description: Leave empty for this year's trip. Use e.g. 2026 for an older vacation.
+      - name: favorite
+        label: Family highlight
+        type: boolean
+        default: false
+
+  - name: memories
+    label: Memories
+    type: file
+    path: data/memories.json
+    format: json
+    list: true
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+      - name: kind
+        label: Kind
+        type: select
+        default: story
+        options:
+          values: [highlight, story, moment]
+      - name: text
+        label: Story
+        type: text
+      - name: author
+        label: Written by
+        type: string
+      - name: year
+        label: Year (past trips only)
+        type: number
+        description: Leave empty for this year's trip.
+      - name: photo
+        label: Photo (optional)
+        type: image
+        options:
+          media: photos
+
+  - name: config
+    label: Site settings
+    type: file
+    path: data/config.json
+    format: json
+    fields:
+      - name: title
+        label: Site name
+        type: string
+      - name: year
+        label: Trip year
+        type: number
+      - name: welcome
+        label: Welcome message
+        type: string
+      - name: tagline
+        label: Tagline
+        type: string
+      - name: timezone
+        label: Time zone
+        type: string
+      - name: weather
+        label: Weather location
+        type: object
+        fields:
+          - { name: lat, label: Latitude, type: number }
+          - { name: lng, label: Longitude, type: number }
+      - name: map
+        label: Map start view
+        type: object
+        fields:
+          - { name: lat, label: Latitude, type: number }
+          - { name: lng, label: Longitude, type: number }
+          - { name: zoom, label: Zoom, type: number }

@@ -20,7 +20,7 @@
     document.body.dataset.route = name;
     F.pages[name]($('#app'), arg);
     const label = F.nav(name) ? F.nav(name)[2] : TITLES[name];
-    document.title = (name === 'home' ? '' : label + ' Â· ') + F.siteName;
+    document.title = (name === 'home' ? '' : label + ' \u00b7 ') + F.siteName;
     renderNav();
     if (!arg) window.scrollTo(0, 0);
     if (!first) $('#app').focus({ preventScroll: true });
@@ -57,7 +57,7 @@
 
   $('#brand-name').textContent = F.siteName;
   $('#foot-name').textContent = F.siteName;
-  if (F.config.lastUpdated) $('#stamp').textContent = ' Â· Last updated ' + F.shortDate(F.config.lastUpdated);
+  if (F.config.lastUpdated) $('#stamp').textContent = ' \u00b7 Last updated ' + F.shortDate(F.config.lastUpdated);
 
   window.addEventListener('hashchange', route);
   route();

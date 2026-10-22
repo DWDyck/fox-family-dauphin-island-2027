@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Islander Seafood Grill",
+    "type": "restaurant",
+    "address": "Bienville Blvd, Dauphin Island, AL",
+    "lat": 30.2506,
+    "lng": -88.11,
+    "description": "Casual seafood, kid friendly."
+  },
+  {
+    "name": "Dockside Oyster Bar",
+    "type": "restaurant",
+    "address": "Cadillac Ave, Dauphin Island, AL",
+    "lat": 30.2532,
+    "lng": -88.087,
+    "description": "Waterfront oysters and po-boys."
+  },
+  {
+    "name": "Island Market",
+    "type": "grocery",
+    "address": "Bienville Blvd, Dauphin Island, AL",
+    "lat": 30.251,
+    "lng": -88.1085,
+    "description": "Groceries, ice, and beach supplies."
+  },
+  {
+    "name": "Public Beach Access",
+    "type": "beach",
+    "address": "Bienville Blvd, Dauphin Island, AL",
+    "lat": 30.249,
+    "lng": -88.115,
+    "description": "Parking and restrooms."
+  },
+  {
+    "name": "West End Beach",
+    "type": "beach",
+    "address": "West end, Dauphin Island, AL",
+    "lat": 30.245,
+    "lng": -88.155,
+    "description": "Best sunsets. Group photo spot."
+  },
+  {
+    "name": "Marina - Dolphin Cruise",
+    "type": "activity",
+    "address": "Dauphin Island Marina, Dauphin Island, AL",
+    "lat": 30.252,
+    "lng": -88.078,
+    "description": "Dolphin cruise departs here."
+  },
+  {
+    "name": "Fishing Pier",
+    "type": "activity",
+    "address": "Public Fishing Pier, Dauphin Island, AL",
+    "lat": 30.251,
+    "lng": -88.14,
+    "description": "Fishing and crabbing."
+  }
+]

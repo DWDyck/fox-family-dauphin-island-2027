@@ -127,7 +127,7 @@
   F.isMeal = (e) => e.category === 'meal' || !!e.mealType;
   F.isDinner = (e) => F.isMeal(e) && e.mealType !== 'breakfast' && e.mealType !== 'lunch' && (F.minutes(e.time) == null || F.minutes(e.time) >= 15 * 60);
 
-  // Build the day list and flat event list from schedule.js (the single source of truth for dates).
+  // Build the day list and flat event list from data/schedule.json (the single source of truth for dates).
   const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const byTime = (a, b) => (F.minutes(a.time) == null ? 1e4 : F.minutes(a.time)) - (F.minutes(b.time) == null ? 1e4 : F.minutes(b.time));
   F.days = []; F.events = [];

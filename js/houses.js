@@ -14,8 +14,8 @@
     const fs = F.families.filter((f) => f.house === h.id);
     const evs = F.events.filter((e) => e.location === h.id);
     const details = row('Parking', h.parking) +
-      (h.manager ? '<dt>Property manager</dt><dd>' + esc(h.manager.name || '') + '</dd>' : '') + row('Notes', h.notes) +
-      (evs.length ? '<dt>Plans here</dt><dd>' + evs.map((e) => '<a class="pill-link" href="#/calendar/' + e.date + '">' + esc(F.shortDate(e.date)) + (e.time ? ', ' + esc(e.time) : '') + ' ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ ' + esc(e.title) + '</a>').join('<br>') + '</dd>' : '');
+      (h.manager && h.manager.name ? '<dt>Property manager</dt><dd>' + esc(h.manager.name || '') + '</dd>' : '') + row('Notes', h.notes) +
+      (evs.length ? '<dt>Plans here</dt><dd>' + evs.map((e) => '<a class="pill-link" href="#/calendar/' + e.date + '">' + esc(F.shortDate(e.date)) + (e.time ? ', ' + esc(e.time) : '') + ' \u2013 ' + esc(e.title) + '</a>').join('<br>') + '</dd>' : '');
     return '<article class="card house" id="h-' + esc(h.id) + '" aria-labelledby="hn-' + esc(h.id) + '"><div class="house-head"><h2 id="hn-' + esc(h.id) + '">' + esc(h.name) + '</h2>' +
       (h.address ? '<p class="meta">' + esc(h.address) + '</p>' : '<p class="meta">Address coming soon</p>') + (h.description ? '<p>' + esc(h.description) + '</p>' : '') + '</div>' +
       '<div class="house-body"><h3>Staying here</h3>' + (fs.length ? '<ul class="people">' + fs.map(person).join('') + '</ul>' : '<p class="meta">No one assigned yet.</p>') +

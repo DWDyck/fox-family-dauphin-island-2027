@@ -7,21 +7,16 @@ A mobile-first family vacation dashboard: the week's meals and plans in one tabl
 ## Sections
 🏖️ This Week · 🗺️ Map · 🌤️ Weather · 🏠 Houses & Family · 📸 Photos & Memories
 
-## Update the content
-**Easiest: open `admin.html`** in Chrome or Edge (double-click it on your computer). Click *Connect project folder* once (pick the folder containing `index.html`; the page shows a green "Connected" bar), add or edit events, families, houses, places, photos and memories with simple forms, then *Save*. Photos are resized automatically. Publish with GitHub Desktop or `git add -A; git commit -m "Update"; git push`; the site updates in a few minutes. Free, local, no account or hosting.
+## Update the content (no code, no git)
+1. Open **[app.pagescms.org](https://app.pagescms.org)** (works on a phone) and sign in with GitHub.
+2. Pick this repository the first time (it asks permission once). Bookmark the page.
+3. Choose **Schedule**, **Families**, **Houses**, **Map places**, **Photos**, **Memories** or **Site settings**, change things in the form, and tap **Save**.
 
-Or edit the files in `data/` by hand:
+Save commits straight to the repo and the live site updates in 1–5 minutes (hard-refresh a phone if it looks stale). Uploaded photos over 1600 px are shrunk automatically by a GitHub Action. The forms are defined in `.pages.yml`.
 
-| To change | Edit |
-|---|---|
-| Trip dates, meals, events | `data/schedule.js` (the only place dates live) |
-| Houses, addresses, parking, manager name | `data/houses.js` |
-| Who stays where (names only, no phone/email) | `data/families.js` |
-| Map places | `data/locations.js` |
-| Photos, memories (`year` for past trips) | `data/photos.js`, `data/memories.js`, `images/` |
-| Title, year, weather location, timezone | `data/config.js` |
+Houses, places and families are matched by **name**, so type them exactly (an event's *Where* is a house or place name; *Host* is a family name). Then open the site's `#/check` page: it lists anything that doesn't match, in plain English.
 
-After editing, open `index.html#/check` to catch mistakes. Preview any day with `index.html?today=2027-06-22`. If phones show stale content, bump `VERSION` in `sw.js`.
+Content lives in `data/*.json` (`schedule`, `houses`, `families`, `locations`, `photos`, `memories`, `config`); you can also edit those by hand on github.com. Preview a day with `?today=2027-06-22`.
 
 ## Run locally
 Open `index.html`, or serve the folder with any static server. Host on GitHub Pages from `main` / root.
