@@ -10,6 +10,7 @@ A static, mobile-first family vacation dashboard on GitHub Pages. Vanilla JS and
 
 ## Files
 ```
+admin.html        LOCAL content editor (forms -> writes data/*.js + resized images via File System Access API, bumps sw.js VERSION). Not linked from the site.
 index.html        shell, inline theme script (sets data-theme before paint), script order
 styles.css        all CSS: 1 tokens, 2 base, 3 header/nav, 4 layout, 5 components, 6 wide screens/print
 sw.js             service worker (network first). Bump VERSION on every deploy; list new files in CORE
@@ -41,6 +42,9 @@ Script load order matters (data, util, components, weather, check, pages, home, 
 - Home page: title card (countdown) then the weekly meal board (horizontally scrollable on phones, min-width 600px, sticky day column). Nothing else.
 - Edit emoji with `\u{...}` escapes in JS; PowerShell mangles emoji in files.
 
+## Admin editor (admin.html)
+Self-contained page that loads the data files, edits an in-memory copy, and regenerates `data/*.js` (comments are regenerated from headers in the page). If you change a data field or schema, update `FIELDS`, `HDR` and `validate()` in `admin.html` too. No contact fields (phone/email) or door/Wi-Fi codes exist on purpose. Test by serving the folder and opening `admin.html`; `window.FOXADMIN` exposes `texts()` and `validate()`.
+
 ## Develop and test
 No tooling required.
 1. `node --check` each JS file.
@@ -49,7 +53,7 @@ No tooling required.
 4. Open `#/check` and confirm no errors.
 
 ## Deploy
-Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R dwdike-maker/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v8`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
+Commit and push to `main`; Pages builds in 1-5 minutes (`gh run list -R dwdike-maker/fox-family-dauphin-island-2027`). Bump `VERSION` in `sw.js` (currently `fox-2027-v10`) so phones refresh. `git push` writes to stderr and may exit non-zero even on success; verify with `git status -sb`. Commits use the trailer `Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>`.
 
 ## External services
 Open-Meteo (weather, no key), OpenStreetMap tiles and Leaflet from unpkg (map, loaded lazily), Nominatim (geocoding addresses lacking lat/lng, cached). All degrade gracefully offline.

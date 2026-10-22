@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fox Family Site Editor</title>
+<style>
+  :root{--bg:#f4efe6;--card:#fff;--ink:#12303f;--muted:#5b717c;--line:#d8cfbf;--accent:#0b7d8f;--accent-ink:#fff;--coral:#e0644a;--warn:#fff4d6;--ok:#e3f5ea;--bad:#fde7e3}
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+  header.top{position:sticky;top:0;z-index:5;background:#0b3b52;color:#fff;padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  header.top h1{font-size:1.1rem;margin:0;flex:1 1 auto}
+  button,.btn{font:inherit;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+  button.danger{color:#a3321f;border-color:#e3b3aa}
+  button.small{min-height:36px;padding:0 12px;font-size:.92rem}
+  button:disabled{opacity:.5;cursor:default}
+  header.top button{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff}
+  header.top button.primary{background:#ff8f73;border-color:#ff8f73;color:#3a0f06}
+  .badge{font-size:.9rem;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.18)}
+  .badge.dirty{background:#ffd166;color:#4a3300;font-weight:700}
+  nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 0;max-width:1100px;margin:0 auto}
+  nav.tabs button{border-bottom-left-radius:0;border-bottom-right-radius:0;white-space:nowrap}
+  nav.tabs button[aria-current=true]{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+  main{max-width:1100px;margin:0 auto;padding:12px 16px 80px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  .note{background:var(--warn);border:1px solid #ecd48a;border-radius:10px;padding:10px 14px;margin:0 0 14px}
+  .note.ok{background:var(--ok);border-color:#a8d9b8}
+  .note.bad{background:var(--bad);border-color:#e3b3aa}
+  details.help{margin:0 0 14px}
+  details.help summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+  details.help ol{margin:4px 0 0;padding-left:22px}
+  .split{display:grid;gap:14px}
+  @media(min-width:820px){.split{grid-template-columns:300px 1fr;align-items:start}}
+  .list{display:flex;flex-direction:column;gap:6px;max-height:70vh;overflow:auto}
+  .list button{justify-content:flex-start;text-align:left;height:auto;min-height:48px;padding:8px 12px;flex-direction:column;align-items:flex-start;gap:0;width:100%}
+  .list button small{color:var(--muted)}
+  .list button[aria-current=true]{border-color:var(--accent);background:#e4f4f6;box-shadow:inset 3px 0 0 var(--accent)}
+  .list.thumbs button{flex-direction:row;align-items:center;gap:10px}
+  .list.thumbs img,.thumb{width:48px;height:48px;object-fit:cover;border-radius:8px;background:#ddd;flex:none}
+  label.f{display:block;margin:0 0 12px}
+  label.f>span{display:block;font-weight:700;font-size:.92rem;margin-bottom:4px}
+  label.f small{display:block;color:var(--muted);margin-top:3px}
+  input[type=text],input[type=number],input[type=date],select,textarea{font:inherit;width:100%;min-height:44px;padding:8px 10px;border:1px solid #b9ae9a;border-radius:10px;background:#fff;color:var(--ink)}
+  textarea{resize:vertical}
+  input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #7fd0dc;outline-offset:1px}
+  label.chk{display:flex;gap:10px;align-items:center;min-height:44px;font-weight:600}
+  label.chk input{width:22px;height:22px}
+  .row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .grid2{display:grid;gap:0 12px}
+  @media(min-width:600px){.grid2{grid-template-columns:1fr 1fr}}
+  .imgf{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  details.ev{border:1px solid var(--line);border-radius:12px;margin:0 0 10px;background:#fcfaf6}
+  details.ev>summary{cursor:pointer;min-height:48px;padding:8px 14px;display:flex;align-items:center;gap:8px;font-weight:700}
+  details.ev>div{padding:0 14px 8px}
+  h2{margin:0 0 10px;font-size:1.15rem}
+  h3{margin:18px 0 8px;font-size:1rem}
+  code,pre{font-family:ui-monospace,Consolas,monospace;background:#efe8da;border-radius:6px;padding:2px 6px}
+  pre{padding:10px;overflow:auto;white-space:pre-wrap}
+  ul.issues{margin:6px 0 0;padding-left:20px}
+  .muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Fox Family Site Editor</h1>
+  <span class="badge" id="state">No changes</span>
+  <button type="button" id="connect">Connect project folder</button>
+  <button type="button" class="primary" id="save">Save</button>
+</header>
+<nav class="tabs" id="tabs" aria-label="Sections"></nav>
+<main id="main"></main>
+<datalist id="times"></datalist>
+
+<script src="data/config.js"></script>
+<script src="data/houses.js"></script>
+<script src="data/locations.js"></script>
+<script src="data/families.js"></script>
+<script src="data/schedule.js"></script>
+<script src="data/photos.js"></script>
+<script src="data/memories.js"></script>
+<script>
+/* Fox Family Site Editor. Runs only in your browser; nothing is uploaded anywhere.
+   It edits an in-memory copy of the data/*.js files, then writes the files (and resized photos) into your
+   project folder. Then you commit and push as usual. Use Chrome or Edge to save straight into the folder;
+   other browsers fall back to downloads. */
+(function () {
+  'use strict';
+  const F = window.FOX;
+  const clone = (o) => JSON.parse(JSON.stringify(o === undefined ? null : o));
+  const D = { config: clone(F.config), houses: clone(F.houses), locations: clone(F.locations), families: clone(F.families), schedule: clone(F.schedule), photos: clone(F.photos), memories: clone(F.memories), albums: clone(F.albums || []) };
+  const pending = new Map();   // image path -> Blob waiting to be written
+  const urls = new Map();      // image path -> object URL for previews
+  let dirHandle = null;
+
+  /* ---------- tiny helpers ---------- */
+  const h = (tag, attrs, ...kids) => {
+    const e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach((k) => {
+      const v = attrs[k];
+      if (k === 'class') e.className = v;
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v);
+      else if (v === true) e.setAttribute(k, '');
+      else if (v !== false && v != null) e.setAttribute(k, v);
+    });
+    kids.flat(9).forEach((c) => { if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c)); });
+    return e;
+  };
+  const $ = (s) => document.querySelector(s);
+  const slug = (s) => String(s || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  const pad = (n) => String(n).padStart(2, '0');
+  const ymd = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const parse = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); if (!m) return null; const d = new Date(+m[1], +m[2] - 1, +m[3]); return d.getMonth() === +m[2] - 1 ? d : null; };
+  const nice = (s) => { const d = parse(s); return d ? d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : (s || 'no date'); };
+  const getp = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
+  const setp = (o, p, v) => {
+    const ks = p.split('.'); let a = o;
+    ks.slice(0, -1).forEach((k) => { a = a[k] = a[k] || {}; });
+    const last = ks[ks.length - 1];
+    if (v === undefined || v === '' || (typeof v === 'number' && isNaN(v))) delete a[last]; else a[last] = v;
+    if (ks.length > 1 && !Object.keys(o[ks[0]]).length) delete o[ks[0]];
+  };
+  const minutes = (t) => { const m = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(t || ''); if (!m) return null; return ((+m[1] % 12) + (/p/i.test(m[3]) ? 12 : 0)) * 60 + +m[2]; };
+  const previewUrl = (p) => { if (!pending.has(p)) return p; if (!urls.has(p)) urls.set(p, URL.createObjectURL(pending.get(p))); return urls.get(p); };
+
+  /* ---------- writing the data files ---------- */
+  const IDENT = /^[A-Za-z_$][\w$]*$/;
+  const q = (s) => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, '\\n') + "'";
+  const isEmpty = (k, v) => v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length && k !== 'events');
+  function lit(v, ind) {
+    if (typeof v === 'string') return q(v);
+    if (typeof v !== 'object' || v === null) return String(v);
+    const p = '  '.repeat(ind + 1), end = '  '.repeat(ind);
+    if (Array.isArray(v)) {
+      if (!v.length) return '[]';
+      if (v.every((x) => typeof x !== 'object')) return '[' + v.map((x) => lit(x, 0)).join(', ') + ']';
+      return '[\n' + v.map((x) => p + lit(x, ind + 1)).join(',\n') + '\n' + end + ']';
+    }
+    const ents = Object.keys(v).filter((k) => k.slice(0, 2) !== '__' && !isEmpty(k, v[k])).map((k) => [IDENT.test(k) ? k : q(k), v[k]]);
+    const deep = ents.some((e) => Array.isArray(e[1]) && e[1].some((y) => typeof y === 'object'));
+    if (!deep) { const one = '{ ' + ents.map((e) => e[0] + ': ' + lit(e[1], ind + 1)).join(', ') + ' }'; if (one.length + ind * 2 <= 150) return one; }
+    return '{\n' + ents.map((e) => p + e[0] + ': ' + lit(e[1], ind + 1)).join(',\n') + '\n' + end + '}';
+  }
+  const ordered = (o, fields) => {
+    const r = {}; const keys = fields.map((f) => f.k.split('.')[0]);
+    keys.forEach((k) => { if (o[k] !== undefined) r[k] = o[k]; });
+    Object.keys(o).forEach((k) => { if (!(k in r)) r[k] = o[k]; });
+    return r;
+  };
+
+  /* ---------- field definitions ---------- */
+  const optsOf = (a) => a.map((x) => [x, x]);
+  const CATS = optsOf(['plan', 'meal', 'excursion', 'beach', 'arrival', 'departure']);
+  const MEALS = optsOf(['breakfast', 'lunch', 'dinner', 'seafood boil', 'cookout', 'celebration', 'gathering']);
+  const blank = (arr, label) => [['', label || '(none)']].concat(arr);
+  const houseOpts = () => D.houses.map((x) => [x.id, x.name || x.id]);
+  const placeOpts = () => D.locations.map((x) => [x.id, x.name || x.id]);
+
+  const FIELDS = {
+    config: [
+      { k: 'title', l: 'Site name', t: 'text', help: 'The year is added automatically.' },
+      { k: 'year', l: 'Trip year', t: 'num', help: 'Every date in the schedule must be in this year.' },
+      { k: 'timezone', l: 'Time zone', t: 'text', help: 'Decides what "today" means. Dauphin Island is America/Chicago.' },
+      { k: 'welcome', l: 'Welcome line', t: 'text' }, { k: 'tagline', l: 'Tagline', t: 'text' },
+      { k: 'weather.lat', l: 'Weather latitude', t: 'num' }, { k: 'weather.lng', l: 'Weather longitude', t: 'num' },
+      { k: 'map.lat', l: 'Map centre latitude', t: 'num' }, { k: 'map.lng', l: 'Map centre longitude', t: 'num' }, { k: 'map.zoom', l: 'Map zoom', t: 'num', help: '12 is a good island view.' },
+      { k: 'lastUpdated', l: 'Last updated', t: 'text' }
+    ],
+    houses: [
+      { k: 'name', l: 'House name', t: 'text' },
+      { k: 'address', l: 'Address', t: 'text', help: 'Shown on the site and used for Directions. Remember this repo is public.' },
+      { k: 'lat', l: 'Latitude (optional)', t: 'num', help: 'Gives an exact map pin. Without it the map looks the address up online.' }, { k: 'lng', l: 'Longitude (optional)', t: 'num' },
+      { k: 'description', l: 'Description', t: 'area' }, { k: 'parking', l: 'Parking', t: 'text' },
+      { k: 'manager.name', l: 'Property manager', t: 'text' }, { k: 'notes', l: 'Notes', t: 'area' }
+    ],
+    families: [
+      { k: 'name', l: 'Family name', t: 'text', help: 'e.g. Ben & Sarah Fox' },
+      { k: 'members', l: 'Members', t: 'list', help: 'Separate names with commas.' },
+      { k: 'house', l: 'Staying in', t: 'select', opts: () => blank(houseOpts(), '(not assigned yet)') },
+      { k: 'photo', l: 'Photo (optional)', t: 'image', dir: 'family', max: 400 }
+    ],
+    locations: [
+      { k: 'name', l: 'Place name', t: 'text' },
+      { k: 'type', l: 'Type', t: 'select', opts: () => optsOf(['restaurant', 'grocery', 'beach', 'activity', 'gathering']) },
+      { k: 'address', l: 'Address', t: 'text' },
+      { k: 'lat', l: 'Latitude', t: 'num' }, { k: 'lng', l: 'Longitude', t: 'num' },
+      { k: 'description', l: 'Description', t: 'area' }
+    ],
+    days: [
+      { k: 'date', l: 'Date', t: 'date' },
+      { k: 'title', l: 'Day headline (optional)', t: 'text', help: 'e.g. Arrival Day' },
+      { k: 'dinner', l: 'Dinner', t: 'dinner' }
+    ],
+    events: [
+      { k: 'title', l: 'Title', t: 'text' },
+      { k: 'time', l: 'Time', t: 'time', help: 'Pick or type like 6:30 PM so it sorts correctly.' },
+      { k: 'category', l: 'Category', t: 'select', opts: () => CATS },
+      { k: 'status', l: 'Status', t: 'select', opts: () => [['', 'Confirmed'], ['tentative', 'Tentative (dashed on the site)']] },
+      { k: 'location', l: 'Where', t: 'select', opts: () => blank(houseOpts().concat(placeOpts()), '(default / none)') },
+      { k: 'host', l: 'Host family', t: 'select', opts: () => blank(D.families.map((x) => [x.id, x.name || x.id])) },
+      { k: 'mealType', l: 'Meal type', t: 'select', show: (o) => o.category === 'meal', opts: () => blank(MEALS), help: 'Breakfast and lunch fill those columns; a meal at 3 PM or later is a dinner.' },
+      { k: 'description', l: 'Description', t: 'area' }, { k: 'notes', l: 'Notes', t: 'area' }
+    ],
+    photos: [
+      { k: 'src', l: 'Photo', t: 'image', dir: 'photos', max: 1600 },
+      { k: 'caption', l: 'Caption', t: 'text' },
+      { k: 'album', l: 'Album', t: 'select', opts: () => D.albums.map((a) => [a, a]) },
+      { k: 'year', l: 'Year (past vacations only)', t: 'num', help: 'Leave blank for this year\'s trip.' },
+      { k: 'date', l: 'Date (optional)', t: 'date' },
+      { k: 'favorite', l: 'Show in Family highlights', t: 'check' }
+    ],
+    memories: [
+      { k: 'kind', l: 'Kind', t: 'select', opts: () => optsOf(['highlight', 'story', 'moment']) },
+      { k: 'title', l: 'Title', t: 'text' }, { k: 'text', l: 'Story', t: 'area' }, { k: 'author', l: 'Who wrote it', t: 'text' },
+      { k: 'year', l: 'Year (past vacations only)', t: 'num', help: 'Leave blank for this year\'s trip.' },
+      { k: 'date', l: 'Date (optional)', t: 'date' },
+      { k: 'photo', l: 'Photo (optional)', t: 'select', opts: () => blank(D.photos.map((p) => [p.src, p.caption || p.src])) }
+    ]
+  };
+
+  /* ---------- generating file text ---------- */
+  const HDR = {
+    config: '/* SITE SETTINGS - edited with admin.html. Trip DATES come from schedule.js. */\nwindow.FOX = window.FOX || {};\n',
+    houses: '/* RENTAL HOUSES - edited with admin.html. Do NOT put door, gate or Wi-Fi codes here: this repo is public.\n   id: short lowercase name. Families and events point to it. */\n',
+    locations: '/* MAP PLACES (everything except the rental houses, which live in houses.js).\n   type: restaurant | grocery | beach | activity | gathering */\n',
+    families: '/* FAMILY DIRECTORY - edited with admin.html. house: the id of a house in houses.js. photo: optional image path. */\n',
+    schedule: '/* THE VACATION SCHEDULE - every date on the site comes from this file. Edited with admin.html.\n   One block per day, in order, with no gaps. Times look like \'6:00 PM\'. category: plan | meal | excursion | beach | arrival | departure.\n   status: \'tentative\' or omitted (= confirmed). location: a house or place id. host: a family id.\n   mealType (meals only): breakfast | lunch | dinner | seafood boil | cookout | celebration | gathering. */\n',
+    photos: '/* PHOTOS - edited with admin.html. Images live in images/. album must be in FOX.albums.\n   year: optional (past vacations). favorite: true shows in Family highlights. date: YYYY-MM-DD. */\n',
+    memories: '/* MEMORIES - stories and highlights. kind: highlight | story | moment. year: optional (past vacations). */\n'
+  };
+  const list = (arr, fields) => arr.map((o) => ordered(o, fields));
+  function texts(stamp) {
+    const cfg = clone(D.config); if (stamp) cfg.lastUpdated = stamp;
+    const days = clone(D.schedule).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)).map((d) => {
+      d.events = (d.events || []).map((e) => ordered(e, [{ k: 'id' }].concat(FIELDS.events)));
+      return ordered(d, FIELDS.days.concat([{ k: 'events' }]));
+    });
+    return {
+      'data/config.js': HDR.config + 'FOX.config = ' + lit(ordered(cfg, FIELDS.config), 0) + ';\n',
+      'data/houses.js': HDR.houses + 'FOX.houses = ' + lit(list(clone(D.houses), [{ k: 'id' }].concat(FIELDS.houses)), 0) + ';\n',
+      'data/locations.js': HDR.locations + 'FOX.locations = ' + lit(list(clone(D.locations), [{ k: 'id' }].concat(FIELDS.locations)), 0) + ';\n',
+      'data/families.js': HDR.families + 'FOX.families = ' + lit(list(clone(D.families), [{ k: 'id' }].concat(FIELDS.families)), 0) + ';\n',
+      'data/schedule.js': HDR.schedule + 'FOX.schedule = ' + lit(days, 0) + ';\n',
+      'data/photos.js': HDR.photos + 'FOX.albums = ' + lit(D.albums, 0) + ';\n\nFOX.photos = ' + lit(list(clone(D.photos), FIELDS.photos), 0) + ';\n',
+      'data/memories.js': HDR.memories + 'FOX.memories = ' + lit(list(clone(D.memories), FIELDS.memories), 0) + ';\n'
+    };
+  }
+  const original = texts();
+  const changedFiles = () => { const t = texts(); return Object.keys(t).filter((k) => t[k] !== original[k]); };
+
+  /* ---------- state indicator ---------- */
+  let timer = 0;
+  const touch = () => { clearTimeout(timer); timer = setTimeout(() => {
+    const n = changedFiles().length + pending.size;
+    const s = $('#state'); s.textContent = n ? 'Unsaved changes' : 'No changes'; s.className = 'badge' + (n ? ' dirty' : '');
+  }, 150); };
+  window.addEventListener('beforeunload', (e) => { if (changedFiles().length || pending.size) { e.preventDefault(); e.returnValue = ''; } });
+
+  /* ---------- images ---------- */
+  async function shrink(file, max) {
+    if (file.type === 'image/svg+xml' || file.type === 'image/gif') return { blob: file, ext: file.name.split('.').pop().toLowerCase() };
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.85));
+    return { blob, ext: 'jpg' };
+  }
+  const usedPaths = () => { const s = new Set(pending.keys()); D.photos.forEach((p) => s.add(p.src)); D.families.forEach((f) => f.photo && s.add(f.photo)); return s; };
+  async function addImage(file, dir, max) {
+    const r = await shrink(file, max); const used = usedPaths();
+    const base = slug(file.name.replace(/\.[^.]+$/, '')) || 'photo'; let p = 'images/' + dir + '/' + base + '.' + r.ext, n = 2;
+    while (used.has(p)) p = 'images/' + dir + '/' + base + '-' + (n++) + '.' + r.ext;
+    pending.set(p, r.blob); return p;
+  }
+
+  /* ---------- field rendering ---------- */
+  function fieldNode(f, o, ctx) {
+    if (f.show && !f.show(o)) return null;
+    const val = getp(o, f.k);
+    const upd = (v, re) => { setp(o, f.k, v); ctx.change(f); if (re) ctx.rerender(); };
+    const wrap = (ctl, noLabelText) => h('label', { class: 'f' }, noLabelText ? null : h('span', null, f.l), ctl, f.help ? h('small', null, f.help) : null);
+    let ctl;
+    switch (f.t) {
+      case 'area': ctl = h('textarea', { rows: 3, oninput: (e) => upd(e.target.value) }); ctl.value = val == null ? '' : val; return wrap(ctl);
+      case 'num': ctl = h('input', { type: 'number', step: 'any', inputmode: 'decimal', oninput: (e) => upd(e.target.value === '' ? undefined : Number(e.target.value)) }); ctl.value = val == null ? '' : val; return wrap(ctl);
+      case 'date': ctl = h('input', { type: 'date', oninput: (e) => upd(e.target.value) }); ctl.value = val || ''; return wrap(ctl);
+      case 'time': ctl = h('input', { type: 'text', list: 'times', placeholder: '6:30 PM', autocomplete: 'off', oninput: (e) => upd(e.target.value.trim()) }); ctl.value = val || ''; return wrap(ctl);
+      case 'list': ctl = h('input', { type: 'text', oninput: (e) => upd(e.target.value.split(',').map((x) => x.trim()).filter(Boolean)) }); ctl.value = (val || []).join(', '); return wrap(ctl);
+      case 'select': {
+        const opts = f.opts(o).slice(); if (val != null && val !== '' && !opts.some((x) => x[0] === val)) opts.push([val, val + ' (missing)']);
+        ctl = h('select', { onchange: (e) => upd(e.target.value, true) }, opts.map((x) => h('option', { value: x[0] }, x[1]))); ctl.value = val == null ? '' : val; return wrap(ctl);
+      }
+      case 'check': return h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: !!val, onchange: (e) => upd(e.target.checked ? true : undefined) }), f.l);
+      case 'dinner': {
+        const mode = val === false ? 'none' : typeof val === 'string' ? 'text' : 'auto';
+        const sel = h('select', { onchange: (e) => { const m = e.target.value; upd(m === 'none' ? false : m === 'text' ? ' ' : undefined, true); } },
+          h('option', { value: 'auto' }, 'Normal (dinner shown if planned)'), h('option', { value: 'none' }, 'No dinner this day'), h('option', { value: 'text' }, 'Show a note instead (e.g. Each family on their own)'));
+        sel.value = mode;
+        const txt = mode === 'text' ? h('input', { type: 'text', style: 'margin-top:6px', oninput: (e) => { o.dinner = e.target.value; ctx.change(f); } }) : null;
+        if (txt) txt.value = val.trim() === '' ? '' : val;
+        return h('label', { class: 'f' }, h('span', null, f.l), sel, txt);
+      }
+      case 'image': {
+        const file = h('input', { type: 'file', accept: 'image/*', hidden: true, onchange: async (e) => { const fl = e.target.files[0]; if (!fl) return; setp(o, f.k, await addImage(fl, f.dir, f.max)); ctx.change(f); ctx.rerender(); } });
+        return h('div', { class: 'f imgf' },
+          val ? h('img', { class: 'thumb', src: previewUrl(val), alt: '' }) : h('span', { class: 'thumb' }),
+          h('div', null, h('b', null, f.l), h('div', { class: 'muted' }, val || 'No image yet'),
+            h('div', { class: 'row' }, file, h('button', { type: 'button', class: 'small', onclick: () => file.click() }, val ? 'Replace image' : 'Choose image'),
+              val && f.dir === 'family' ? h('button', { type: 'button', class: 'small', onclick: () => { setp(o, f.k, undefined); ctx.change(f); ctx.rerender(); } }, 'Remove') : null)));
+      }
+      default: ctl = h('input', { type: 'text', oninput: (e) => upd(e.target.value) }); ctl.value = val == null ? '' : val; return wrap(ctl);
+    }
+  }
+  function renderFields(host, o, fields, ctx) {
+    const draw = () => {
+      host.textContent = '';
+      const rer = { change: ctx.change, rerender: draw };
+      const nodes = fields.map((f) => fieldNode(f, o, rer)).filter(Boolean);
+      host.append(...nodes);
+    };
+    draw();
+  }
+
+  /* ---------- references ---------- */
+  const refs = {
+    houses: (id) => [[D.families, 'house'], [evAll(), 'location']].map((p) => [p[0].filter((x) => x[p[1]] === id), p[1]]),
+    locations: (id) => [[evAll(), 'location']].map((p) => [p[0].filter((x) => x[p[1]] === id), p[1]]),
+    families: (id) => [[evAll(), 'host']].map((p) => [p[0].filter((x) => x[p[1]] === id), p[1]])
+  };
+  const evAll = () => D.schedule.reduce((a, d) => a.concat(d.events || []), []);
+  const uniqueId = (base, taken, self) => { let id = base, n = 2; while (taken().some((x) => x.id === id && x !== self)) id = base + '-' + (n++); return id; };
+
+  /* ---------- generic list + form view ---------- */
+  const sel = {};
+  function collection(root, spec) {
+    const arr = spec.arr();
+    sel[spec.key] = Math.min(sel[spec.key] || 0, Math.max(0, arr.length - 1));
+    const listEl = h('div', { class: 'list' + (spec.thumbs ? ' thumbs' : ''), role: 'list' });
+    const formEl = h('div', { class: 'panel' });
+    const draw = () => {
+      listEl.textContent = '';
+      arr.forEach((o, i) => {
+        const b = h('button', { type: 'button', 'aria-current': i === sel[spec.key] ? 'true' : 'false', onclick: () => { sel[spec.key] = i; collection(root, spec); } }, ...spec.row(o));
+        listEl.append(b);
+      });
+    };
+    const form = () => {
+      formEl.textContent = '';
+      const o = arr[sel[spec.key]];
+      if (!o) { formEl.append(h('p', { class: 'muted' }, 'Nothing here yet. Use the Add button.')); return; }
+      const fh = h('div'); const ctx = { change: (f) => {
+        if (spec.nameKey && (!o.id || o.__auto) && (!f || f.k === spec.nameKey)) { const s = slug(o[spec.nameKey]); if (s) { o.id = uniqueId(s, spec.allIds || spec.arr, o); o.__auto = true; } }
+        draw(); touch(); }, rerender: () => { collection(root, spec); } };
+      formEl.append(spec.intro ? h('p', { class: 'muted' }, spec.intro) : null, fh);
+      renderFields(fh, o, spec.fields, ctx);
+      if (spec.nameKey && o.id) formEl.append(h('p', { class: 'muted' }, 'Internal ID: ', h('code', null, o.id), ' (fixed once created)'));
+      formEl.append(h('div', { class: 'row' },
+        h('button', { type: 'button', class: 'small', onclick: () => { const c = clone(o); delete c.__auto; if (spec.nameKey) { c.id = uniqueId(slug(c[spec.nameKey] || 'copy') + '-copy', spec.allIds || spec.arr, null); } arr.splice(sel[spec.key] + 1, 0, c); sel[spec.key]++; collection(root, spec); touch(); } }, 'Duplicate'),
+        h('button', { type: 'button', class: 'small', disabled: sel[spec.key] === 0, onclick: () => { const i = sel[spec.key]; arr.splice(i - 1, 0, arr.splice(i, 1)[0]); sel[spec.key]--; collection(root, spec); touch(); } }, 'Move up'),
+        h('button', { type: 'button', class: 'small', disabled: sel[spec.key] === arr.length - 1, onclick: () => { const i = sel[spec.key]; arr.splice(i + 1, 0, arr.splice(i, 1)[0]); sel[spec.key]++; collection(root, spec); touch(); } }, 'Move down'),
+        h('button', { type: 'button', class: 'small danger', onclick: () => remove(o) }, 'Delete')));
+    };
+    const remove = (o) => {
+      const used = spec.refs && o.id ? refs[spec.refs](o.id) : [];
+      const n = used.reduce((a, u) => a + u[0].length, 0);
+      if (!confirm('Delete "' + (spec.name ? spec.name(o) : 'this item') + '"?' + (n ? '\n\n' + n + ' other item(s) point to it; those links will be cleared.' : ''))) return;
+      used.forEach((u) => u[0].forEach((x) => { delete x[u[1]]; }));
+      arr.splice(sel[spec.key], 1); collection(root, spec); touch();
+    };
+    const add = h('button', { type: 'button', class: 'primary', onclick: () => { arr.push(spec.blank()); sel[spec.key] = arr.length - 1; collection(root, spec); touch(); } }, '+ ' + spec.addLabel);
+    root.textContent = '';
+    root.append(spec.top ? spec.top() : null, h('div', { class: 'split' }, h('div', null, h('div', { class: 'row' }, add, spec.extraBtn ? spec.extraBtn(root) : null), listEl), formEl));
+    draw(); form();
+  }
+
+  /* ---------- schedule view ---------- */
+  function schedule(root) {
+    const days = D.schedule;
+    sel.days = Math.min(sel.days || 0, Math.max(0, days.length - 1));
+    const listEl = h('div', { class: 'list' }), form = h('div', { class: 'panel' });
+    const drawList = () => { listEl.textContent = ''; days.forEach((d, i) => listEl.append(h('button', { type: 'button', 'aria-current': i === sel.days ? 'true' : 'false', onclick: () => { sel.days = i; schedule(root); } },
+      h('b', null, nice(d.date)), h('small', null, (d.title ? d.title + ' \u00b7 ' : '') + (d.events || []).length + ' event(s)')))); };
+    const nextDate = () => { const last = days.length ? parse(days[days.length - 1].date) : null; if (!last) return D.config.year + '-06-01'; last.setDate(last.getDate() + 1); return ymd(last); };
+    const addDay = h('button', { type: 'button', class: 'primary', onclick: () => { days.push({ date: nextDate(), events: [] }); sel.days = days.length - 1; schedule(root); touch(); } }, '+ Add next day');
+    const d = days[sel.days];
+    const draw = () => {
+      form.textContent = '';
+      if (!d) { form.append(h('p', { class: 'muted' }, 'No days yet. Use "Add next day".')); return; }
+      const ctx = { change: () => { drawList(); touch(); }, rerender: () => schedule(root) };
+      const top = h('div'); form.append(h('h2', null, nice(d.date)), top); renderFields(top, d, FIELDS.days, ctx);
+      form.append(h('div', { class: 'row' }, h('button', { type: 'button', class: 'small danger', onclick: () => { if (!confirm('Delete ' + nice(d.date) + ' and its ' + (d.events || []).length + ' event(s)?')) return; days.splice(sel.days, 1); schedule(root); touch(); } }, 'Delete this day')));
+      form.append(h('h3', null, 'Events and meals'));
+      d.events = d.events || [];
+      d.events.forEach((e, i) => {
+        const body = h('div'); const sum = h('summary', null, '');
+        const label = () => { sum.textContent = (e.time || 'No time') + '  \u00b7  ' + (e.title || 'Untitled') + (e.status === 'tentative' ? '  (tentative)' : ''); };
+        label();
+        const ectx = { change: (f) => {
+          if (!e.id || e.__auto) { const s = slug(e.title); if (s) { e.id = uniqueId(s, evAll, e); e.__auto = true; } }
+          label(); drawList(); touch(); }, rerender: () => schedule(root) };
+        renderFields(body, e, FIELDS.events, ectx);
+        const move = h('select', { 'aria-label': 'Move to another day', onchange: (ev) => { const t = days.find((x) => x.date === ev.target.value); if (!t) return; d.events.splice(i, 1); (t.events = t.events || []).push(e); schedule(root); touch(); } },
+          h('option', { value: '' }, 'Move to another day...'), days.filter((x) => x !== d).map((x) => h('option', { value: x.date }, nice(x.date))));
+        const det = h('details', { class: 'ev', open: e.__open || !e.title }, sum, h('div', null, body, h('div', { class: 'row' },
+          h('button', { type: 'button', class: 'small', onclick: () => { const c = clone(e); delete c.__auto; delete c.id; d.events.splice(i + 1, 0, c); schedule(root); touch(); } }, 'Duplicate'),
+          h('button', { type: 'button', class: 'small danger', onclick: () => { if (confirm('Delete "' + (e.title || 'this event') + '"?')) { d.events.splice(i, 1); schedule(root); touch(); } } }, 'Delete'), move)));
+        form.append(det);
+      });
+      form.append(h('div', { class: 'row' }, h('button', { type: 'button', class: 'primary', onclick: () => { d.events.push({ title: '', time: '6:00 PM', category: 'plan', __open: true }); schedule(root); touch(); } }, '+ Add event or meal')));
+    };
+    root.textContent = '';
+    root.append(h('div', { class: 'split' }, h('div', null, h('div', { class: 'row' }, addDay), listEl), form));
+    drawList(); draw();
+  }
+
+  /* ---------- photos extras ---------- */
+  const photosTop = () => {
+    const box = h('div', { class: 'panel' }, h('h2', null, 'Albums'));
+    const inp = h('input', { type: 'text', oninput: (e) => { D.albums = e.target.value.split(',').map((x) => x.trim()).filter(Boolean); touch(); } }); inp.value = D.albums.join(', ');
+    box.append(h('label', { class: 'f' }, h('span', null, 'Album names'), inp, h('small', null, 'Separate with commas. Each photo picks one of these.')));
+    return box;
+  };
+  const multiAdd = (root) => {
+    const inp = h('input', { type: 'file', accept: 'image/*', multiple: true, hidden: true, onchange: async (e) => {
+      for (const fl of e.target.files) { const p = await addImage(fl, 'photos', 1600); D.photos.push({ src: p, caption: '', album: D.albums[0] || '' }); }
+      sel.photos = D.photos.length - 1; collection(root, specs.photos); touch(); } });
+    return h('span', null, inp, h('button', { type: 'button', onclick: () => inp.click() }, 'Add several photos'));
+  };
+
+  const specs = {
+    families: { key: 'families', arr: () => D.families, fields: FIELDS.families, nameKey: 'name', refs: 'families', addLabel: 'Add family', name: (o) => o.name, blank: () => ({ name: '', members: [] }),
+      row: (o) => [h('b', null, o.name || 'New family'), h('small', null, (D.houses.find((x) => x.id === o.house) || {}).name || 'No house yet')], intro: 'Names only - the site deliberately has no phone or email fields.' },
+    houses: { key: 'houses', arr: () => D.houses, fields: FIELDS.houses, nameKey: 'name', refs: 'houses', addLabel: 'Add house', name: (o) => o.name, blank: () => ({ name: '' }),
+      row: (o) => [h('b', null, o.name || 'New house'), h('small', null, o.address || 'No address yet')], intro: 'Do not enter door, gate or Wi-Fi codes: this site is public. Share those privately.' },
+    locations: { key: 'locations', arr: () => D.locations, fields: FIELDS.locations, nameKey: 'name', refs: 'locations', addLabel: 'Add place', name: (o) => o.name, blank: () => ({ name: '', type: 'restaurant' }),
+      row: (o) => [h('b', null, o.name || 'New place'), h('small', null, o.type || '')] },
+    photos: { key: 'photos', arr: () => D.photos, fields: FIELDS.photos, thumbs: true, addLabel: 'Add one photo', name: (o) => o.caption || o.src, blank: () => ({ src: '', caption: '', album: D.albums[0] || '' }), top: photosTop, extraBtn: multiAdd,
+      row: (o) => [o.src ? h('img', { src: previewUrl(o.src), alt: '' }) : h('span', { class: 'thumb' }), h('span', null, h('b', null, o.caption || 'No caption'), h('br'), h('small', null, (o.album || '') + (o.year ? ' \u00b7 ' + o.year : '')))] },
+    memories: { key: 'memories', arr: () => D.memories, fields: FIELDS.memories, addLabel: 'Add memory', name: (o) => o.title, blank: () => ({ kind: 'story', title: '', text: '' }),
+      row: (o) => [h('b', null, o.title || 'New memory'), h('small', null, o.kind + (o.year ? ' \u00b7 ' + o.year : ''))] }
+  };
+
+  /* ---------- checks before saving ---------- */
+  function validate() {
+    const out = [], add = (l, m) => out.push([l, m]);
+    const ids = (arr, what) => { const seen = {}; arr.forEach((x) => { if (!x.name) add('error', what + ' with no name.'); if (!x.id) return; if (seen[x.id]) add('error', 'Two ' + what + 's share the id "' + x.id + '".'); seen[x.id] = 1; }); };
+    ids(D.houses, 'house'); ids(D.families, 'family'); ids(D.locations, 'place');
+    const placeIds = new Set(D.houses.concat(D.locations).map((x) => x.id)), famIds = new Set(D.families.map((x) => x.id));
+    D.families.forEach((f) => { if (f.house && !D.houses.some((x) => x.id === f.house)) add('error', f.name + ': house "' + f.house + '" does not exist.'); });
+    const dates = {}; let prev = null;
+    D.schedule.slice().sort((a, b) => (a.date < b.date ? -1 : 1)).forEach((d) => {
+      const dt = parse(d.date);
+      if (!dt) { add('error', 'A day has an invalid date.'); return; }
+      if (dates[d.date]) add('error', nice(d.date) + ' appears twice.'); dates[d.date] = 1;
+      if (dt.getFullYear() !== D.config.year) add('error', nice(d.date) + ' is not in ' + D.config.year + '.');
+      if (prev && Math.round((dt - prev) / 864e5) !== 1 && prev.getTime() !== dt.getTime()) add('error', 'There is a gap before ' + nice(d.date) + '. Days must be consecutive.');
+      prev = dt;
+      (d.events || []).forEach((e) => {
+        const w = nice(d.date) + ' "' + (e.title || 'untitled') + '"';
+        if (!e.title) add('error', nice(d.date) + ' has an event with no title.');
+        if (e.time && minutes(e.time) == null) add('warn', w + ': time "' + e.time + '" is not like 6:30 PM, so it sorts last.');
+        if (e.location && !placeIds.has(e.location)) add('error', w + ': place "' + e.location + '" does not exist.');
+        if (e.host && !famIds.has(e.host)) add('error', w + ': host "' + e.host + '" does not exist.');
+        if (e.category === 'meal' && !e.mealType) add('warn', w + ': a meal with no meal type will not appear in a column.');
+      });
+    });
+    D.photos.forEach((p) => { if (!p.src) add('error', 'A photo has no image.'); if (p.album && D.albums.indexOf(p.album) < 0) add('error', 'Photo "' + (p.caption || p.src) + '": album "' + p.album + '" is not in the album list.'); });
+    D.memories.forEach((m) => { if (!m.title) add('error', 'A memory has no title.'); });
+    return out;
+  }
+
+  /* ---------- saving ---------- */
+  async function writeFile(root, path, data) {
+    const parts = path.split('/'); let d = root;
+    for (const p of parts.slice(0, -1)) d = await d.getDirectoryHandle(p, { create: true });
+    const fh = await d.getFileHandle(parts[parts.length - 1], { create: true });
+    const w = await fh.createWritable(); await w.write(data); await w.close();
+  }
+  const download = (name, blob) => { const a = h('a', { href: URL.createObjectURL(blob), download: name.split('/').pop() }); document.body.append(a); a.click(); a.remove(); };
+  async function save() {
+    const problems = validate();
+    const errs = problems.filter((p) => p[0] === 'error');
+    if (errs.length) { showResult('bad', 'Fix these before saving:', errs.map((p) => p[1])); return; }
+    const probe = texts(); const changed = Object.keys(probe).filter((k) => probe[k] !== original[k]);
+    if (!changed.length && !pending.size) { showResult('ok', 'Nothing to save: no changes.'); return; }
+    const files = texts(changed.length ? ymd(new Date()) : undefined);
+    const toWrite = Object.keys(files).filter((k) => files[k] !== original[k]);
+    const notes = problems.map((p) => p[1]);
+    try {
+      if (dirHandle) {
+        if ((await dirHandle.requestPermission({ mode: 'readwrite' })) !== 'granted') throw new Error('Permission to write to the folder was not granted.');
+        for (const k of toWrite) await writeFile(dirHandle, k, files[k]);
+        for (const p of pending.keys()) await writeFile(dirHandle, p, pending.get(p));
+        try {
+          const sw = await (await dirHandle.getFileHandle('sw.js')).getFile(), t = await sw.text();
+          const nt = t.replace(/(fox-\d{4}-v)(\d+)/, (m, a, b) => a + (+b + 1));
+          if (nt !== t) await writeFile(dirHandle, 'sw.js', nt);
+        } catch (e) { notes.push('Could not bump sw.js (phones may need a hard refresh).'); }
+        if (changed.length) D.config.lastUpdated = ymd(new Date()); toWrite.forEach((k) => { original[k] = files[k]; });
+        pending.forEach((b, p) => { /* now saved; keep preview URL */ }); const n = pending.size; pending.clear();
+        showResult('ok', 'Saved to your project folder: ' + toWrite.length + ' data file(s)' + (n ? ' and ' + n + ' image(s)' : '') + '.', notes, true);
+      } else {
+        if (changed.length) D.config.lastUpdated = ymd(new Date());
+        toWrite.forEach((k) => download(k, new Blob([files[k]], { type: 'text/javascript' })));
+        pending.forEach((b, p) => download(p, b));
+        if (changed.length) D.config.lastUpdated = ymd(new Date()); toWrite.forEach((k) => { original[k] = files[k]; }); const n = pending.size; pending.clear();
+        showResult('ok', 'Downloaded ' + toWrite.length + ' data file(s)' + (n ? ' and ' + n + ' image(s)' : '') + '. Move data files into the project\'s data folder and images into images/, replacing the old ones. For one-click saving, use Chrome or Edge and "Connect project folder".', notes, true);
+      }
+    } catch (e) { showResult('bad', 'Could not save: ' + e.message); return; }
+    touch();
+  }
+  function showResult(kind, title, items, publish) {
+    let box = $('#result'); if (box) box.remove();
+    box = h('div', { id: 'result', class: 'note ' + (kind === 'ok' ? 'ok' : kind === 'bad' ? 'bad' : ''), role: 'status' }, h('b', null, title),
+      items && items.length ? h('ul', { class: 'issues' }, items.map((i) => h('li', null, i))) : null,
+      publish ? h('div', null, h('p', null, 'Next, publish it. In a terminal in the project folder:'), h('pre', null, 'git add -A\ngit commit -m "Update vacation info"\ngit push'),
+        h('p', { class: 'muted' }, 'Or use GitHub Desktop: review changes, Commit, Push. The live site updates in a few minutes; hard-refresh phones if needed. Check index.html#/check first if you like.')) : null);
+    $('#main').prepend(box); window.scrollTo(0, 0);
+  }
+
+  /* ---------- project folder connection ---------- */
+  const idb = () => new Promise((res, rej) => { const r = indexedDB.open('fox-admin', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  const kv = async (mode, fn) => { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction('kv', mode), s = t.objectStore('kv'), r = fn(s); t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error); }); };
+  async function verify(d) { await d.getFileHandle('index.html'); await d.getDirectoryHandle('data'); }
+  async function connect() {
+    if (!window.showDirectoryPicker) { alert('Your browser cannot write to folders. Use Chrome or Edge, or just click Save to download the files.'); return; }
+    try {
+      let d = null;
+      try { d = await kv('readonly', (s) => s.get('dir')); } catch (e) {}
+      if (d && (await d.requestPermission({ mode: 'readwrite' })) !== 'granted') d = null;
+      if (!d) { d = await window.showDirectoryPicker({ mode: 'readwrite' }); }
+      await verify(d); dirHandle = d;
+      try { await kv('readwrite', (s) => s.put(d, 'dir')); } catch (e) {}
+      $('#connect').textContent = 'Folder: ' + d.name;
+    } catch (e) { if (e.name !== 'AbortError') alert('That folder does not look like the Fox Family site (it needs index.html and a data folder).'); }
+  }
+  $('#connect').onclick = connect;
+  $('#save').onclick = save;
+
+  /* ---------- tabs and start ---------- */
+  const TABS = [['schedule', 'Schedule'], ['families', 'Families'], ['houses', 'Houses'], ['locations', 'Map places'], ['photos', 'Photos'], ['memories', 'Memories'], ['settings', 'Settings']];
+  let tab = 'schedule';
+  const help = () => h('details', { class: 'help panel' }, h('summary', null, 'How this works (tap to read)'),
+    h('ol', null, h('li', null, 'Click ', h('b', null, 'Connect project folder'), ' once and choose the folder that contains index.html (Chrome or Edge).'),
+      h('li', null, 'Add or change anything in the tabs. Nothing is saved until you click ', h('b', null, 'Save'), '.'),
+      h('li', null, 'Save writes the data files and resized photos into the folder and refreshes the phone cache version.'),
+      h('li', null, 'Publish with GitHub Desktop or ', h('code', null, 'git add -A; git commit; git push'), '. The site updates in a few minutes.')),
+    h('p', { class: 'muted' }, 'Everything runs on your computer. No account, hosting or cost. Tip: this site is public, so avoid private details.'));
+  function render() {
+    const nav = $('#tabs'); nav.textContent = '';
+    TABS.forEach((t) => nav.append(h('button', { type: 'button', 'aria-current': String(t[0] === tab), onclick: () => { tab = t[0]; render(); } }, t[1])));
+    const main = $('#main'); main.textContent = ''; const body = h('div'); main.append(help(), body);
+    if (tab === 'schedule') schedule(body);
+    else if (tab === 'settings') { const p = h('div', { class: 'panel' }, h('h2', null, 'Site settings')); const fh = h('div', { class: 'grid2' }); p.append(fh); renderFields(fh, D.config, FIELDS.config.filter((f) => f.k !== 'lastUpdated'), { change: touch, rerender: () => {} }); body.append(p); }
+    else collection(body, specs[tab]);
+  }
+  const dl = $('#times'); for (let m = 6 * 60; m < 24 * 60; m += 30) { const hr = Math.floor(m / 60), mi = m % 60; dl.append(h('option', { value: ((hr + 11) % 12 + 1) + ':' + pad(mi) + ' ' + (hr >= 12 ? 'PM' : 'AM') })); }
+  window.FOXADMIN = { D, texts, validate, FIELDS };
+  render();
+  if (window.showDirectoryPicker) kv('readonly', (s) => s.get('dir')).then((d) => { if (d) $('#connect').textContent = 'Reconnect folder: ' + d.name; }).catch(() => {});
+})();
+</script>
+</body>
+</html>

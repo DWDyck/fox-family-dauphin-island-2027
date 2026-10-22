@@ -5,9 +5,7 @@
   const person = (f) => {
     const hosting = F.events.filter((e) => e.host === f.id && F.isMeal(e));
     return '<li class="person">' + F.avatar(f) + '<div class="who"><b>' + esc(f.name) + '</b>' + (f.members && f.members.length ? '<span class="meta">' + esc(f.members.join(', ')) + '</span>' : '') +
-      (hosting.length ? '<span class="meta">Hosting: ' + hosting.map((e) => '<a class="pill-link" href="#/calendar/' + e.date + '">' + esc(e.title) + '</a>').join(', ') + '</span>' : '') + '</div>' +
-      '<div class="actions">' + (f.phone ? '<a class="btn small" href="tel:' + esc(f.phone) + '" aria-label="Call ' + esc(f.name) + '">Call</a><a class="btn small" href="sms:' + esc(f.phone) + '" aria-label="Text ' + esc(f.name) + '">Text</a>' : '') +
-      (f.email ? '<a class="btn small" href="mailto:' + esc(f.email) + '" aria-label="Email ' + esc(f.name) + '">Email</a>' : '') + '</div></li>';
+      (hosting.length ? '<span class="meta">Hosting: ' + hosting.map((e) => '<a class="pill-link" href="#/calendar/' + e.date + '">' + esc(e.title) + '</a>').join(', ') + '</span>' : '') + '</div></li>';
   };
 
   const row = (k, v, copy) => v ? '<dt>' + k + '</dt><dd>' + (copy ? '<span class="code">' + esc(v) + '</span> <button type="button" class="small" data-copy="' + esc(v) + '" aria-label="Copy ' + k + '">Copy</button>' : nl(v)) + '</dd>' : '';
@@ -16,13 +14,13 @@
     const fs = F.families.filter((f) => f.house === h.id);
     const evs = F.events.filter((e) => e.location === h.id);
     const details = row('Parking', h.parking) +
-      (h.manager ? '<dt>Property manager</dt><dd>' + esc(h.manager.name || '') + (h.manager.phone ? ' <a href="tel:' + esc(h.manager.phone) + '">' + esc(h.manager.phone) + '</a>' : '') + '</dd>' : '') + row('Notes', h.notes) +
-      (evs.length ? '<dt>Plans here</dt><dd>' + evs.map((e) => '<a class="pill-link" href="#/calendar/' + e.date + '">' + esc(F.shortDate(e.date)) + (e.time ? ', ' + esc(e.time) : '') + ' â€“ ' + esc(e.title) + '</a>').join('<br>') + '</dd>' : '');
+      (h.manager ? '<dt>Property manager</dt><dd>' + esc(h.manager.name || '') + '</dd>' : '') + row('Notes', h.notes) +
+      (evs.length ? '<dt>Plans here</dt><dd>' + evs.map((e) => '<a class="pill-link" href="#/calendar/' + e.date + '">' + esc(F.shortDate(e.date)) + (e.time ? ', ' + esc(e.time) : '') + ' ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ ' + esc(e.title) + '</a>').join('<br>') + '</dd>' : '');
     return '<article class="card house" id="h-' + esc(h.id) + '" aria-labelledby="hn-' + esc(h.id) + '"><div class="house-head"><h2 id="hn-' + esc(h.id) + '">' + esc(h.name) + '</h2>' +
       (h.address ? '<p class="meta">' + esc(h.address) + '</p>' : '<p class="meta">Address coming soon</p>') + (h.description ? '<p>' + esc(h.description) + '</p>' : '') + '</div>' +
       '<div class="house-body"><h3>Staying here</h3>' + (fs.length ? '<ul class="people">' + fs.map(person).join('') + '</ul>' : '<p class="meta">No one assigned yet.</p>') +
       '<h3>Quick actions</h3><div class="row"><a class="btn primary" target="_blank" rel="noopener" href="' + F.mapsLink(h.address || h.name) + '">Directions</a><a class="btn" href="#/map/' + esc(h.id) + '">View on map</a>' +
-      (h.manager && h.manager.phone ? '<a class="btn" href="tel:' + esc(h.manager.phone) + '">Call manager</a>' : '') + '</div>' +
+      '</div>' +
       (details ? '<details class="info"><summary>Details</summary><dl class="kv">' + details + '</dl></details>' : '') + '</div></article>';
   };
 

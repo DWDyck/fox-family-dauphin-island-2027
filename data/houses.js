@@ -8,7 +8,7 @@ FOX.houses = [
     lat: 30.2481, lng: -88.1220,
     description: 'Main family house. Gathering spot for most dinners.',
     parking: 'Up to 4 cars in the drive. Overflow on the street side only.',
-    manager: { name: 'Island Rentals', phone: '251-555-0101' },
+    manager: { name: 'Island Rentals' },
     notes: 'Trash pickup Tuesday. Outdoor shower by the back deck.'
   },
   {
@@ -16,7 +16,7 @@ FOX.houses = [
     lat: 30.2495, lng: -88.1015,
     description: 'Short walk to the beach.',
     parking: '2 cars under the house.',
-    manager: { name: 'Gulf Property Mgmt', phone: '251-555-0102' },
+    manager: { name: 'Gulf Property Mgmt' },
     notes: 'No shoes inside, please.'
   },
   {
@@ -24,7 +24,7 @@ FOX.houses = [
     lat: 30.2468, lng: -88.1370,
     description: 'Sleeps 14. Pool and big deck.',
     parking: 'Gated lot. 3 spaces.',
-    manager: { name: 'Island Rentals', phone: '251-555-0101' },
+    manager: { name: 'Island Rentals' },
     notes: 'Pool closes at 10 PM.'
   }
 ];

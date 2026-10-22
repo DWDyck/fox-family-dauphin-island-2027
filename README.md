@@ -13,8 +13,8 @@ Edit the files in `data/`, commit and push; the site updates in a few minutes.
 | To change | Edit |
 |---|---|
 | Trip dates, meals, events | `data/schedule.js` (the only place dates live) |
-| Houses, addresses, parking, manager | `data/houses.js` |
-| Who stays where | `data/families.js` |
+| Houses, addresses, parking, manager name | `data/houses.js` |
+| Who stays where (names only, no phone/email) | `data/families.js` |
 | Map places | `data/locations.js` |
 | Photos, memories (`year` for past trips) | `data/photos.js`, `data/memories.js`, `images/` |
 | Title, year, weather location, timezone | `data/config.js` |
