@@ -1,51 +1,31 @@
 # Fox Family Dauphin Island 2027
 
-## 🌐 Live site: [dwdike-maker.github.io/fox-family-dauphin-island-2027](https://dwdike-maker.github.io/fox-family-dauphin-island-2027/)
+**Live site: [dwdike-maker.github.io/fox-family-dauphin-island-2027](https://dwdike-maker.github.io/fox-family-dauphin-island-2027/)**
 
-> **About this project:** an experiment in using AI to build interesting web use cases. Here the use case is a family trip hub: schedule, houses, map, photos and memories in one installable, offline-capable page.
+A mobile-first family vacation dashboard: the week's meals and plans at a glance, live weather, houses and who is staying where, a map, and photos and memories. Installable, works offline after the first visit, with light, dark and auto themes. Plain HTML, CSS and JavaScript: no build, no database. Built as an experiment in using AI to make a genuinely useful family tool.
 
-A static, mobile-first vacation hub. No Node, no build, no database. Open `index.html` locally, or host on GitHub Pages (Settings > Pages > `main` / root).
+## Sections
+🏖️ This Week · 🌤️ Weather · 🍽️ Meals · 📅 Calendar · 🗺️ Map · 🏠 Houses & Family · 📸 Photos & Memories
 
-## Where to update what
+## Update the content
+Edit the files in `data/`, commit and push; the site updates in a few minutes.
 
-| To change... | Edit |
+| To change | Edit |
 |---|---|
-| Events, meals, dinners, trip dates | `data/schedule.js` (the only place dates live) |
-| Houses and who stays there | `data/houses.js` + `data/families.js` (shown together on Houses & Family) |
-| Restaurants, stores, beaches, activities on the map | `data/locations.js` |
-| Photos and albums (optional `year` for past trips) | `data/photos.js` + files in `images/` |
-| Memories (optional `year` for past trips) | `data/memories.js` |
-| Title, year, welcome text, weather, timezone | `data/config.js` |
+| Trip dates, meals, events | `data/schedule.js` (the only place dates live) |
+| Houses, addresses, Wi-Fi, codes | `data/houses.js` |
+| Who stays where | `data/families.js` |
+| Map places | `data/locations.js` |
+| Photos, memories (`year` for past trips) | `data/photos.js`, `data/memories.js`, `images/` |
+| Title, year, weather location, timezone | `data/config.js` |
 
-After editing, commit and push; Pages updates in 1-2 minutes. Bump `VERSION` in `sw.js` if phones keep showing old content.
+After editing, open `index.html#/check` to catch mistakes. Preview any day with `index.html?today=2027-06-22`. If phones show stale content, bump `VERSION` in `sw.js`.
 
-## Schedule model (`data/schedule.js`)
-
-Each day is `{ date: 'YYYY-MM-DD', title, dinner?, events: [...] }`. The day's `date` is the only date; events do not repeat it. Trip start/end and day count are derived from the first and last day. Event fields: `title, time, category, status ('confirmed' | 'tentative'), location, host, mealType, description, notes, id`. Set `dinner: false` for a day with no dinner, or `dinner: 'text'` to show a note instead of "Not planned yet". A meal at 3 PM or later (not breakfast/lunch) counts as dinner.
-
-## Checks and previews
-
-- `#/check` (footer link "Data check") validates dates, weekdays, ids, hosts, locations and lists dinner gaps. Open it after every edit.
-- `?today=2027-06-22` before the `#` previews the site as if it were that day, e.g. `index.html?today=2027-06-22`.
-
-## Real house addresses
-
-In `data/houses.js` replace the `address`, then delete `lat`/`lng`. The map looks the address up (needs internet) and caches the result in the browser. Or paste exact coordinates to skip lookup.
+## Run locally
+Open `index.html`, or serve the folder with any static server. Host on GitHub Pages from `main` / root.
 
 ## Privacy
+This repo is public. Don't commit real door, gate or Wi-Fi codes unless you accept that anyone can read them. The included data is sample placeholder content.
 
-This repo is public. Do not commit real door, gate or Wi-Fi codes unless you accept that anyone can read them.
-
-## Structure
-
-```
-index.html  styles.css  sw.js  manifest.webmanifest
-data/   config, houses, locations, families, schedule, photos, memories
-js/     util (dates, nav, icons), components, weather, check, pages (calendar/map/meals), home, houses, photos, app (router/nav)
-images/
-```
-
-## Dark/light mode and weather
-- The header button cycles Auto / Light / Dark (remembered per device).
-- The Weather page (#/weather) uses the free Open-Meteo API (no key): current, 24-hour, 7-day, and our-week outlook. Dates beyond the 16-day forecast show typical weather from past years. Coordinates are in data/config.js.
-
+## For contributors and AI agents
+See [AGENTS.md](AGENTS.md) for architecture, conventions and the test and deploy workflow, and [REVIEW.md](REVIEW.md) for the design and date-handling review.
