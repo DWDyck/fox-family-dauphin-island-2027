@@ -2,63 +2,78 @@
   {
     "date": "2027-06-19",
     "title": "Arrival Day",
+    "noDinner": true,
     "events": [
       {
         "title": "Check in",
         "time": "4:00 PM",
         "category": "arrival",
-        "description": "Houses open at 4. Stop by Island Market for groceries.",
+        "status": "confirmed",
+        "host": "Grandma & Grandpa Fox",
         "location": "Fox House",
-        "host": "Grandma & Grandpa Fox"
+        "description": "Houses open at 4. Stop by Island Market for groceries."
       },
       {
         "title": "Welcome Pizza Night",
         "time": "6:30 PM",
         "category": "meal",
         "mealType": "dinner",
-        "description": "Casual dinner to kick off the week.",
+        "status": "confirmed",
+        "host": "Grandma & Grandpa Fox",
         "location": "Fox House",
-        "host": "Grandma & Grandpa Fox"
+        "description": "Casual dinner to kick off the week."
       }
     ]
   },
   {
     "date": "2027-06-20",
+    "noDinner": true,
     "events": [
       {
         "title": "Pancake Breakfast",
         "time": "8:00 AM",
         "category": "meal",
         "mealType": "breakfast",
-        "description": "Pancakes and bacon.",
+        "status": "confirmed",
+        "host": "Ben & Sarah Fox",
         "location": "Pelican Cottage",
-        "host": "Ben & Sarah Fox"
+        "description": "Pancakes and bacon."
       },
       {
         "title": "Beach Morning",
         "time": "9:00 AM",
         "category": "beach",
-        "description": "Bring chairs, sunscreen, and shovels.",
-        "location": "Public Beach Access"
+        "status": "confirmed",
+        "location": "Public Beach Access",
+        "description": "Bring chairs, sunscreen, and shovels."
+      },
+      {
+        "title": "Dinner",
+        "time": "5:30",
+        "category": "plan",
+        "status": "confirmed"
       }
     ]
   },
   {
     "date": "2027-06-21",
+    "noDinner": false,
     "events": [
       {
         "title": "Cookout & Burgers",
         "time": "5:30 PM",
         "category": "meal",
         "mealType": "cookout",
-        "description": "Burgers on the grill, pool time before.",
+        "status": "confirmed",
+        "host": "Amy & Tom Miller",
         "location": "Seagull Shores",
-        "host": "Amy & Tom Miller"
+        "description": "Burgers on the grill, pool time before."
       }
     ]
   },
   {
     "date": "2027-06-22",
+    "noDinner": false,
     "dinnerNote": "Each family on their own",
     "events": [
       {
@@ -66,37 +81,40 @@
         "time": "10:00 AM",
         "category": "excursion",
         "status": "tentative",
+        "location": "Marina - Dolphin Cruise",
         "description": "Arrive 30 minutes early.",
-        "notes": "Weather dependent. Final call by 8 AM.",
-        "location": "Marina - Dolphin Cruise"
+        "notes": "Weather dependent. Final call by 8 AM."
       }
     ]
   },
   {
     "date": "2027-06-23",
+    "noDinner": false,
     "events": [
       {
         "title": "Fishing at the Pier",
         "time": "8:00 AM",
         "category": "excursion",
         "status": "tentative",
-        "description": "Bait provided.",
-        "location": "Fishing Pier"
+        "location": "Fishing Pier",
+        "description": "Bait provided."
       },
       {
         "title": "Seafood Boil",
         "time": "6:00 PM",
         "category": "meal",
         "mealType": "seafood boil",
-        "description": "Shrimp, crab, corn, potatoes, sausage.",
-        "notes": "Bring a dessert to share.",
+        "status": "confirmed",
+        "host": "Grandma & Grandpa Fox",
         "location": "Fox House",
-        "host": "Grandma & Grandpa Fox"
+        "description": "Shrimp, crab, corn, potatoes, sausage.",
+        "notes": "Bring a dessert to share."
       }
     ]
   },
   {
     "date": "2027-06-24",
+    "noDinner": false,
     "events": [
       {
         "title": "Anniversary Celebration Dinner",
@@ -104,31 +122,33 @@
         "category": "meal",
         "mealType": "celebration",
         "status": "tentative",
-        "description": "Dinner out for Grandma & Grandpa.",
+        "host": "Ben & Sarah Fox",
         "location": "Islander Seafood Grill",
-        "host": "Ben & Sarah Fox"
+        "description": "Dinner out for Grandma & Grandpa."
       },
       {
         "title": "Group Family Photo",
         "time": "7:30 PM",
         "category": "beach",
         "status": "tentative",
-        "description": "Sunset photo. Wear light blues and whites.",
-        "location": "West End Beach"
+        "location": "West End Beach",
+        "description": "Sunset photo. Wear light blues and whites."
       }
     ]
   },
   {
     "date": "2027-06-25",
+    "noDinner": false,
     "events": [
       {
         "title": "Oysters on the Water",
         "time": "12:30 PM",
         "category": "meal",
         "mealType": "gathering",
-        "description": "Lunch for whoever wants to join.",
+        "status": "confirmed",
+        "host": "Amy & Tom Miller",
         "location": "Dockside Oyster Bar",
-        "host": "Amy & Tom Miller"
+        "description": "Lunch for whoever wants to join."
       }
     ]
   },
@@ -141,8 +161,9 @@
         "title": "Check out",
         "time": "10:00 AM",
         "category": "departure",
-        "description": "Checkout by 10 AM. Strip beds, run dishwasher, take out trash.",
-        "location": "Fox House"
+        "status": "confirmed",
+        "location": "Fox House",
+        "description": "Checkout by 10 AM. Strip beds, run dishwasher, take out trash."
       }
     ]
   }
